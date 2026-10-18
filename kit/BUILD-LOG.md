@@ -104,3 +104,10 @@
 - WhatsApp: `whatsappUrl()` everywhere (header, drawer, sticky, sidebar, page bands, contact, thank-you, footer), always with `?text=`, trip message on trip sidebars, `data-he-event/location/trip`; no link at all while the number is empty.
 - Verified: JSON + `X-Hola-Test` → 201 and stored with `holaSample: true`; form-encoded → 303 to `/en/thank-you/?ref=…`; missing email → 303 back with `errors=email`; mail log lines `to=(not-sent)`; thank-you fires `generate_lead` once and not on reload; with a temporary number the tour page has header/sidebar/page/footer links and the sidebar message names the trip and URL; after clearing, none.
 - DONE
+
+## 2026-10-18 — S10 · SEO
+- `generateMetadata` on every route via `src/lib/seo.ts`: title templates (contracts §10), description = `seo.meta_description` else excerpt (≤155), absolute self-canonical with trailing slash on indexable pages, hreflang `es`/`en`/`x-default` (→ Spanish) only when the item exists in both languages, `noindex, follow` on filtered archive states (no canonical), thank-you, search and 404; `?page=N` alone is self-canonical. Open Graph title/description/url/locale (`es_ES`/`en_US`) with image chain `seo.og_image` → featured image → `og_default` → `/brand/og/og-default-<lang>-1200x630.png`.
+- `robots.ts` (Allow /, Disallow /admin, /api/, /buscar/, /en/search/, Sitemap line) and `sitemap.ts` (every indexable available URL in both languages with `xhtml:link` alternates; terms only when they have items; no thank-you): 98 URLs.
+- JSON-LD: TravelAgency everywhere, BreadcrumbList on every page except home, TouristTrip, TouristDestination, Article, FAQPage; no AggregateRating/Review.
+- Verified with `ACCEPT_SKIP_GATES=1 bash kit/bin/acceptance.sh`: all A7 page checks pass on the 104 URLs, filtered archive, robots and sitemap; only A15 (commit count / uncommitted file) failed, as expected before S13.
+- DONE
