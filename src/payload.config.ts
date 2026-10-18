@@ -7,8 +7,16 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-import { Users } from './collections/Users'
+import { Destinations } from './collections/Destinations'
+import { Guides } from './collections/Guides'
+import { Inquiries } from './collections/Inquiries'
 import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
+import { CruiseTypes, Departures, Durations, GuideTopics, Regions, TripStyles } from './collections/taxonomies'
+import { Cruises, Excursions, Tours } from './collections/trips'
+import { Users } from './collections/Users'
+import { Navigation } from './globals/Navigation'
+import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,7 +42,24 @@ export default buildConfig({
     defaultLocale: 'es',
     fallback: false,
   },
-  collections: [Users, Media],
+  collections: [
+    Tours,
+    Cruises,
+    Excursions,
+    Destinations,
+    Guides,
+    Pages,
+    Media,
+    Durations,
+    TripStyles,
+    CruiseTypes,
+    Departures,
+    Regions,
+    GuideTopics,
+    Inquiries,
+    Users,
+  ],
+  globals: [SiteSettings, Navigation],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -49,5 +74,7 @@ export default buildConfig({
     migrationDir: path.resolve(dirname, 'migrations'),
   }),
   sharp,
+  // Logs go to stderr so the `pnpm hola:*` scripts print only their JSON on stdout.
+  logger: { options: { level: process.env.PAYLOAD_LOG_LEVEL || 'info' }, destination: process.stderr },
   plugins: [],
 })

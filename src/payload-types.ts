@@ -67,8 +67,21 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    tours: Tour;
+    cruises: Cruise;
+    excursions: Excursion;
+    destinations: Destination;
+    guides: Guide;
+    pages: Page;
     media: Media;
+    durations: Duration;
+    'trip-styles': TripStyle;
+    'cruise-types': CruiseType;
+    departures: Departure;
+    regions: Region;
+    'guide-topics': GuideTopic;
+    inquiries: Inquiry;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,8 +89,21 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    tours: ToursSelect<false> | ToursSelect<true>;
+    cruises: CruisesSelect<false> | CruisesSelect<true>;
+    excursions: ExcursionsSelect<false> | ExcursionsSelect<true>;
+    destinations: DestinationsSelect<false> | DestinationsSelect<true>;
+    guides: GuidesSelect<false> | GuidesSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    durations: DurationsSelect<false> | DurationsSelect<true>;
+    'trip-styles': TripStylesSelect<false> | TripStylesSelect<true>;
+    'cruise-types': CruiseTypesSelect<false> | CruiseTypesSelect<true>;
+    departures: DeparturesSelect<false> | DeparturesSelect<true>;
+    regions: RegionsSelect<false> | RegionsSelect<true>;
+    'guide-topics': GuideTopicsSelect<false> | GuideTopicsSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -87,8 +113,14 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+    navigation: Navigation;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+  };
   locale: 'es' | 'en';
   widgets: {
     collections: CollectionsWidget;
@@ -119,6 +151,1040 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tours".
+ */
+export interface Tour {
+  id: number;
+  title: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  available?: boolean | null;
+  excerpt?: string | null;
+  featured_image?: (number | null) | Media;
+  seo?: {
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_image?: (number | null) | Media;
+  };
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  subtitle?: string | null;
+  overview?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  gallery?: (number | Media)[] | null;
+  duration_days: number;
+  /**
+   * Set on save from the days
+   */
+  duration?: (number | null) | Duration;
+  trip_style?: (number | TripStyle)[] | null;
+  guides?: (number | Guide)[] | null;
+  price_from_eur?: number | null;
+  price_from_usd?: number | null;
+  price_basis?: ('per_person_double' | 'per_person' | 'per_group') | null;
+  price_note?: string | null;
+  group_type?: ('private' | 'small' | 'shared') | null;
+  group_min?: number | null;
+  group_max?: number | null;
+  guide_languages?: ('es' | 'en')[] | null;
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  itinerary?:
+    | {
+        label: string;
+        title: string;
+        description?: string | null;
+        places?: (number | Destination)[] | null;
+        meals?: ('B' | 'L' | 'D')[] | null;
+        overnight?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  includes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  excludes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  what_to_bring?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  availability_days?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[] | null;
+  season_note?: string | null;
+  /**
+   * Key of a policy in Settings › Cancellation policies
+   */
+  cancellation_policy?: string | null;
+  cancellation_override?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  destinations?: (number | Destination)[] | null;
+  related_trips?:
+    | (
+        | {
+            relationTo: 'tours';
+            value: number | Tour;
+          }
+        | {
+            relationTo: 'cruises';
+            value: number | Cruise;
+          }
+        | {
+            relationTo: 'excursions';
+            value: number | Excursion;
+          }
+      )[]
+    | null;
+  booking_mode?: ('inquiry' | 'external' | 'bookable') | null;
+  booking_url?: string | null;
+  last_reviewed?: string | null;
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    tile?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    'hero-mobile'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    gallery?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "durations".
+ */
+export interface Duration {
+  id: number;
+  name: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  hero?: (number | null) | Media;
+  h1?: string | null;
+  intro?: string | null;
+  seo_text?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  sort?: number | null;
+  min_days?: number | null;
+  max_days?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trip-styles".
+ */
+export interface TripStyle {
+  id: number;
+  name: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  hero?: (number | null) | Media;
+  h1?: string | null;
+  intro?: string | null;
+  seo_text?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  sort?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides".
+ */
+export interface Guide {
+  id: number;
+  title: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  available?: boolean | null;
+  excerpt?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  featured_image?: (number | null) | Media;
+  seo?: {
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_image?: (number | null) | Media;
+  };
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  guide_topic?: (number | GuideTopic)[] | null;
+  last_updated?: string | null;
+  toc?: boolean | null;
+  related_destinations?: (number | Destination)[] | null;
+  related_trips?:
+    | (
+        | {
+            relationTo: 'tours';
+            value: number | Tour;
+          }
+        | {
+            relationTo: 'cruises';
+            value: number | Cruise;
+          }
+        | {
+            relationTo: 'excursions';
+            value: number | Excursion;
+          }
+      )[]
+    | null;
+  author_name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guide-topics".
+ */
+export interface GuideTopic {
+  id: number;
+  name: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  hero?: (number | null) | Media;
+  h1?: string | null;
+  intro?: string | null;
+  seo_text?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  sort?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations".
+ */
+export interface Destination {
+  id: number;
+  title: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  available?: boolean | null;
+  excerpt?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  featured_image?: (number | null) | Media;
+  seo?: {
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_image?: (number | null) | Media;
+  };
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  region?: (number | null) | Region;
+  tagline?: string | null;
+  best_months?:
+    ('jan' | 'feb' | 'mar' | 'apr' | 'may' | 'jun' | 'jul' | 'aug' | 'sep' | 'oct' | 'nov' | 'dec')[] | null;
+  days_recommended?: number | null;
+  how_to_get_there?: string | null;
+  nearest_airport?: string | null;
+  top_sights?:
+    | {
+        name: string;
+        image?: (number | null) | Media;
+        text?: string | null;
+        map_link?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  lat?: number | null;
+  lng?: number | null;
+  nearby?: (number | Destination)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions".
+ */
+export interface Region {
+  id: number;
+  name: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  hero?: (number | null) | Media;
+  h1?: string | null;
+  intro?: string | null;
+  seo_text?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  sort?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cruises".
+ */
+export interface Cruise {
+  id: number;
+  title: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  available?: boolean | null;
+  excerpt?: string | null;
+  featured_image?: (number | null) | Media;
+  seo?: {
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_image?: (number | null) | Media;
+  };
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  subtitle?: string | null;
+  overview?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  gallery?: (number | Media)[] | null;
+  nights: number;
+  cruise_type?: (number | null) | CruiseType;
+  trip_style?: (number | TripStyle)[] | null;
+  ship_name?: string | null;
+  ship_category?: ('4star' | '5star' | 'deluxe' | 'dahabiya') | null;
+  embark?: (number | null) | Destination;
+  disembark?: (number | null) | Destination;
+  start_dates?:
+    | {
+        date: string;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  cabins?:
+    | {
+        type: string;
+        size_m2?: number | null;
+        beds?: string | null;
+        price_from_eur?: number | null;
+        price_from_usd?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  ship_facilities?: ('pool' | 'sun_deck' | 'restaurant' | 'bar' | 'air_conditioning' | 'wifi' | 'spa' | 'gym')[] | null;
+  deck_plan?: (number | null) | Media;
+  price_from_eur?: number | null;
+  price_from_usd?: number | null;
+  price_basis?: ('per_person_double' | 'per_person' | 'per_group') | null;
+  price_note?: string | null;
+  group_type?: ('private' | 'small' | 'shared') | null;
+  group_min?: number | null;
+  group_max?: number | null;
+  guide_languages?: ('es' | 'en')[] | null;
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  itinerary?:
+    | {
+        label: string;
+        title: string;
+        description?: string | null;
+        places?: (number | Destination)[] | null;
+        meals?: ('B' | 'L' | 'D')[] | null;
+        overnight?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  includes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  excludes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  what_to_bring?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  availability_days?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[] | null;
+  season_note?: string | null;
+  /**
+   * Key of a policy in Settings › Cancellation policies
+   */
+  cancellation_policy?: string | null;
+  cancellation_override?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  destinations?: (number | Destination)[] | null;
+  related_trips?:
+    | (
+        | {
+            relationTo: 'tours';
+            value: number | Tour;
+          }
+        | {
+            relationTo: 'cruises';
+            value: number | Cruise;
+          }
+        | {
+            relationTo: 'excursions';
+            value: number | Excursion;
+          }
+      )[]
+    | null;
+  booking_mode?: ('inquiry' | 'external' | 'bookable') | null;
+  booking_url?: string | null;
+  last_reviewed?: string | null;
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cruise-types".
+ */
+export interface CruiseType {
+  id: number;
+  name: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  hero?: (number | null) | Media;
+  h1?: string | null;
+  intro?: string | null;
+  seo_text?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  sort?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "excursions".
+ */
+export interface Excursion {
+  id: number;
+  title: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  available?: boolean | null;
+  excerpt?: string | null;
+  featured_image?: (number | null) | Media;
+  seo?: {
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_image?: (number | null) | Media;
+  };
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  subtitle?: string | null;
+  overview?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  gallery?: (number | Media)[] | null;
+  duration_hours: number;
+  departure?: (number | Departure)[] | null;
+  start_times?:
+    | {
+        time: string;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  pickup_areas?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  child_price_eur?: number | null;
+  child_price_usd?: number | null;
+  min_age?: number | null;
+  activity_level?: ('easy' | 'moderate' | 'demanding') | null;
+  price_from_eur?: number | null;
+  price_from_usd?: number | null;
+  price_basis?: ('per_person_double' | 'per_person' | 'per_group') | null;
+  price_note?: string | null;
+  group_type?: ('private' | 'small' | 'shared') | null;
+  group_min?: number | null;
+  group_max?: number | null;
+  guide_languages?: ('es' | 'en')[] | null;
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  itinerary?:
+    | {
+        label: string;
+        title: string;
+        description?: string | null;
+        places?: (number | Destination)[] | null;
+        meals?: ('B' | 'L' | 'D')[] | null;
+        overnight?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  includes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  excludes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  what_to_bring?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  availability_days?: ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[] | null;
+  season_note?: string | null;
+  /**
+   * Key of a policy in Settings › Cancellation policies
+   */
+  cancellation_policy?: string | null;
+  cancellation_override?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  destinations?: (number | Destination)[] | null;
+  related_trips?:
+    | (
+        | {
+            relationTo: 'tours';
+            value: number | Tour;
+          }
+        | {
+            relationTo: 'cruises';
+            value: number | Cruise;
+          }
+        | {
+            relationTo: 'excursions';
+            value: number | Excursion;
+          }
+      )[]
+    | null;
+  booking_mode?: ('inquiry' | 'external' | 'bookable') | null;
+  booking_url?: string | null;
+  last_reviewed?: string | null;
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departures".
+ */
+export interface Departure {
+  id: number;
+  name: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  hero?: (number | null) | Media;
+  h1?: string | null;
+  intro?: string | null;
+  seo_text?: string | null;
+  faq?:
+    | {
+        q: string;
+        a: string;
+        id?: string | null;
+      }[]
+    | null;
+  sort?: number | null;
+  destination?: (number | null) | Destination;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * lowercase-with-hyphens, no accents
+   */
+  slug?: string | null;
+  available?: boolean | null;
+  excerpt?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  featured_image?: (number | null) | Media;
+  seo?: {
+    meta_title?: string | null;
+    meta_description?: string | null;
+    og_image?: (number | null) | Media;
+  };
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  template: 'home' | 'default' | 'about' | 'contact' | 'faq' | 'plan-my-trip' | 'thank-you' | 'legal';
+  layout?:
+    | (
+        | {
+            heading: string;
+            lead?: string | null;
+            image?: (number | null) | Media;
+            show_stats?: boolean | null;
+            draft?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            note?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'booking-band';
+          }
+        | {
+            note?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'trust-bar';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            intro?: string | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'destinations-grid';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            intro?: string | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'trips-grid';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            intro?: string | null;
+            image?: (number | null) | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cruises-split';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            intro?: string | null;
+            cities?: (number | Departure)[] | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'excursions-by-city';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            columns?:
+              | {
+                  icon?: ('map-pin' | 'languages' | 'compass' | 'message-circle' | 'calendar-check' | 'sun') | null;
+                  title: string;
+                  text: string;
+                  id?: string | null;
+                }[]
+              | null;
+            draft?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'why';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            intro?: string | null;
+            limit?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'guides-grid';
+          }
+        | {
+            title?: string | null;
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta-band';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            draft?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            members?:
+              | {
+                  name: string;
+                  role?: string | null;
+                  languages?: string | null;
+                  photo?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            items?:
+              | {
+                  title: string;
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            draft?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'steps';
+          }
+        | {
+            title?: string | null;
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'licence';
+          }
+      )[]
+    | null;
+  faq_groups?:
+    | {
+        title: string;
+        items?:
+          | {
+              q: string;
+              a: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  last_updated?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  title?: string | null;
+  status: 'new' | 'replied' | 'won' | 'lost';
+  form?: ('plan_my_trip' | 'contact') | null;
+  trip?:
+    | ({
+        relationTo: 'tours';
+        value: number | Tour;
+      } | null)
+    | ({
+        relationTo: 'cruises';
+        value: number | Cruise;
+      } | null)
+    | ({
+        relationTo: 'excursions';
+        value: number | Excursion;
+      } | null);
+  interests?: string[] | null;
+  length?: string | null;
+  date_mode?: ('exact' | 'month' | 'flexible') | null;
+  date_from?: string | null;
+  date_to?: string | null;
+  month?: string | null;
+  adults?: number | null;
+  children?: number | null;
+  children_ages?: string | null;
+  budget?: string | null;
+  hotel?: string | null;
+  group_type?: string | null;
+  name: string;
+  email: string;
+  whatsapp?: string | null;
+  channel?: ('whatsapp' | 'email') | null;
+  message?: string | null;
+  consent_at?: string | null;
+  marketing?: boolean | null;
+  lang: 'es' | 'en';
+  page_url?: string | null;
+  utm?: {
+    source?: string | null;
+    medium?: string | null;
+    campaign?: string | null;
+    term?: string | null;
+    content?: string | null;
+  };
+  gclid?: string | null;
+  fbclid?: string | null;
+  landing?: string | null;
+  tracked?: boolean | null;
+  ip_hash?: string | null;
+  /**
+   * Removed by `pnpm hola:samples delete`
+   */
+  holaSample?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -146,25 +1212,6 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -188,12 +1235,64 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'tours';
+        value: number | Tour;
+      } | null)
+    | ({
+        relationTo: 'cruises';
+        value: number | Cruise;
+      } | null)
+    | ({
+        relationTo: 'excursions';
+        value: number | Excursion;
+      } | null)
+    | ({
+        relationTo: 'destinations';
+        value: number | Destination;
+      } | null)
+    | ({
+        relationTo: 'guides';
+        value: number | Guide;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'durations';
+        value: number | Duration;
+      } | null)
+    | ({
+        relationTo: 'trip-styles';
+        value: number | TripStyle;
+      } | null)
+    | ({
+        relationTo: 'cruise-types';
+        value: number | CruiseType;
+      } | null)
+    | ({
+        relationTo: 'departures';
+        value: number | Departure;
+      } | null)
+    | ({
+        relationTo: 'regions';
+        value: number | Region;
+      } | null)
+    | ({
+        relationTo: 'guide-topics';
+        value: number | GuideTopic;
+      } | null)
+    | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -239,6 +1338,823 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tours_select".
+ */
+export interface ToursSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  available?: T;
+  excerpt?: T;
+  featured_image?: T;
+  seo?:
+    | T
+    | {
+        meta_title?: T;
+        meta_description?: T;
+        og_image?: T;
+      };
+  holaSample?: T;
+  subtitle?: T;
+  overview?: T;
+  gallery?: T;
+  duration_days?: T;
+  duration?: T;
+  trip_style?: T;
+  guides?: T;
+  price_from_eur?: T;
+  price_from_usd?: T;
+  price_basis?: T;
+  price_note?: T;
+  group_type?: T;
+  group_min?: T;
+  group_max?: T;
+  guide_languages?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  itinerary?:
+    | T
+    | {
+        label?: T;
+        title?: T;
+        description?: T;
+        places?: T;
+        meals?: T;
+        overnight?: T;
+        id?: T;
+      };
+  includes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  excludes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  what_to_bring?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  availability_days?: T;
+  season_note?: T;
+  cancellation_policy?: T;
+  cancellation_override?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  destinations?: T;
+  related_trips?: T;
+  booking_mode?: T;
+  booking_url?: T;
+  last_reviewed?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cruises_select".
+ */
+export interface CruisesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  available?: T;
+  excerpt?: T;
+  featured_image?: T;
+  seo?:
+    | T
+    | {
+        meta_title?: T;
+        meta_description?: T;
+        og_image?: T;
+      };
+  holaSample?: T;
+  subtitle?: T;
+  overview?: T;
+  gallery?: T;
+  nights?: T;
+  cruise_type?: T;
+  trip_style?: T;
+  ship_name?: T;
+  ship_category?: T;
+  embark?: T;
+  disembark?: T;
+  start_dates?:
+    | T
+    | {
+        date?: T;
+        note?: T;
+        id?: T;
+      };
+  cabins?:
+    | T
+    | {
+        type?: T;
+        size_m2?: T;
+        beds?: T;
+        price_from_eur?: T;
+        price_from_usd?: T;
+        id?: T;
+      };
+  ship_facilities?: T;
+  deck_plan?: T;
+  price_from_eur?: T;
+  price_from_usd?: T;
+  price_basis?: T;
+  price_note?: T;
+  group_type?: T;
+  group_min?: T;
+  group_max?: T;
+  guide_languages?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  itinerary?:
+    | T
+    | {
+        label?: T;
+        title?: T;
+        description?: T;
+        places?: T;
+        meals?: T;
+        overnight?: T;
+        id?: T;
+      };
+  includes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  excludes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  what_to_bring?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  availability_days?: T;
+  season_note?: T;
+  cancellation_policy?: T;
+  cancellation_override?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  destinations?: T;
+  related_trips?: T;
+  booking_mode?: T;
+  booking_url?: T;
+  last_reviewed?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "excursions_select".
+ */
+export interface ExcursionsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  available?: T;
+  excerpt?: T;
+  featured_image?: T;
+  seo?:
+    | T
+    | {
+        meta_title?: T;
+        meta_description?: T;
+        og_image?: T;
+      };
+  holaSample?: T;
+  subtitle?: T;
+  overview?: T;
+  gallery?: T;
+  duration_hours?: T;
+  departure?: T;
+  start_times?:
+    | T
+    | {
+        time?: T;
+        label?: T;
+        id?: T;
+      };
+  pickup_areas?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  child_price_eur?: T;
+  child_price_usd?: T;
+  min_age?: T;
+  activity_level?: T;
+  price_from_eur?: T;
+  price_from_usd?: T;
+  price_basis?: T;
+  price_note?: T;
+  group_type?: T;
+  group_min?: T;
+  group_max?: T;
+  guide_languages?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  itinerary?:
+    | T
+    | {
+        label?: T;
+        title?: T;
+        description?: T;
+        places?: T;
+        meals?: T;
+        overnight?: T;
+        id?: T;
+      };
+  includes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  excludes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  what_to_bring?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  availability_days?: T;
+  season_note?: T;
+  cancellation_policy?: T;
+  cancellation_override?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  destinations?: T;
+  related_trips?: T;
+  booking_mode?: T;
+  booking_url?: T;
+  last_reviewed?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations_select".
+ */
+export interface DestinationsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  available?: T;
+  excerpt?: T;
+  content?: T;
+  featured_image?: T;
+  seo?:
+    | T
+    | {
+        meta_title?: T;
+        meta_description?: T;
+        og_image?: T;
+      };
+  holaSample?: T;
+  region?: T;
+  tagline?: T;
+  best_months?: T;
+  days_recommended?: T;
+  how_to_get_there?: T;
+  nearest_airport?: T;
+  top_sights?:
+    | T
+    | {
+        name?: T;
+        image?: T;
+        text?: T;
+        map_link?: T;
+        id?: T;
+      };
+  lat?: T;
+  lng?: T;
+  nearby?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guides_select".
+ */
+export interface GuidesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  available?: T;
+  excerpt?: T;
+  content?: T;
+  featured_image?: T;
+  seo?:
+    | T
+    | {
+        meta_title?: T;
+        meta_description?: T;
+        og_image?: T;
+      };
+  holaSample?: T;
+  guide_topic?: T;
+  last_updated?: T;
+  toc?: T;
+  related_destinations?: T;
+  related_trips?: T;
+  author_name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  available?: T;
+  excerpt?: T;
+  content?: T;
+  featured_image?: T;
+  seo?:
+    | T
+    | {
+        meta_title?: T;
+        meta_description?: T;
+        og_image?: T;
+      };
+  holaSample?: T;
+  template?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              lead?: T;
+              image?: T;
+              show_stats?: T;
+              draft?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'booking-band'?:
+          | T
+          | {
+              note?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'trust-bar'?:
+          | T
+          | {
+              note?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'destinations-grid'?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'trips-grid'?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'cruises-split'?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+              image?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'excursions-by-city'?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+              cities?: T;
+              id?: T;
+              blockName?: T;
+            };
+        why?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              columns?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              draft?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'guides-grid'?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              intro?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'cta-band'?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        text?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              body?: T;
+              draft?: T;
+              id?: T;
+              blockName?: T;
+            };
+        team?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    languages?: T;
+                    photo?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        steps?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              draft?: T;
+              id?: T;
+              blockName?: T;
+            };
+        licence?:
+          | T
+          | {
+              title?: T;
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  faq_groups?:
+    | T
+    | {
+        title?: T;
+        items?:
+          | T
+          | {
+              q?: T;
+              a?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  last_updated?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  holaSample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        tile?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        'hero-mobile'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        gallery?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "durations_select".
+ */
+export interface DurationsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  hero?: T;
+  h1?: T;
+  intro?: T;
+  seo_text?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  sort?: T;
+  min_days?: T;
+  max_days?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trip-styles_select".
+ */
+export interface TripStylesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  hero?: T;
+  h1?: T;
+  intro?: T;
+  seo_text?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  sort?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cruise-types_select".
+ */
+export interface CruiseTypesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  hero?: T;
+  h1?: T;
+  intro?: T;
+  seo_text?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  sort?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departures_select".
+ */
+export interface DeparturesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  hero?: T;
+  h1?: T;
+  intro?: T;
+  seo_text?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  sort?: T;
+  destination?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions_select".
+ */
+export interface RegionsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  hero?: T;
+  h1?: T;
+  intro?: T;
+  seo_text?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  sort?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "guide-topics_select".
+ */
+export interface GuideTopicsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  hero?: T;
+  h1?: T;
+  intro?: T;
+  seo_text?: T;
+  faq?:
+    | T
+    | {
+        q?: T;
+        a?: T;
+        id?: T;
+      };
+  sort?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  title?: T;
+  status?: T;
+  form?: T;
+  trip?: T;
+  interests?: T;
+  length?: T;
+  date_mode?: T;
+  date_from?: T;
+  date_to?: T;
+  month?: T;
+  adults?: T;
+  children?: T;
+  children_ages?: T;
+  budget?: T;
+  hotel?: T;
+  group_type?: T;
+  name?: T;
+  email?: T;
+  whatsapp?: T;
+  channel?: T;
+  message?: T;
+  consent_at?: T;
+  marketing?: T;
+  lang?: T;
+  page_url?: T;
+  utm?:
+    | T
+    | {
+        source?: T;
+        medium?: T;
+        campaign?: T;
+        term?: T;
+        content?: T;
+      };
+  gclid?: T;
+  fbclid?: T;
+  landing?: T;
+  tracked?: T;
+  ip_hash?: T;
+  holaSample?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -260,24 +2176,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -321,6 +2219,402 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  /**
+   * Digits only, country code included, no "+" (e.g. 201001234567)
+   */
+  whatsapp_number?: string | null;
+  whatsapp_message_default?: string | null;
+  contact_email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  reply_hours?: string | null;
+  legal_name?: string | null;
+  licence_number?: string | null;
+  social?:
+    | {
+        network: 'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'x' | 'linkedin';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  booking_band?: {
+    enabled?: boolean | null;
+    badge?: string | null;
+    title?: string | null;
+    text?: string | null;
+    primary_label?: string | null;
+    secondary_label?: string | null;
+  };
+  stats?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  trust_items?:
+    | {
+        icon?: ('languages' | 'map-pin' | 'calendar-check' | 'message-circle' | 'compass' | 'shield-check') | null;
+        text: string;
+        enabled?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  archive_intros?: {
+    tours?: {
+      h1?: string | null;
+      intro?: string | null;
+      hero?: (number | null) | Media;
+      seo_text?: string | null;
+      faq?:
+        | {
+            q: string;
+            a: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    cruises?: {
+      h1?: string | null;
+      intro?: string | null;
+      hero?: (number | null) | Media;
+      seo_text?: string | null;
+      faq?:
+        | {
+            q: string;
+            a: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    excursions?: {
+      h1?: string | null;
+      intro?: string | null;
+      hero?: (number | null) | Media;
+      seo_text?: string | null;
+      faq?:
+        | {
+            q: string;
+            a: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    destinations?: {
+      h1?: string | null;
+      intro?: string | null;
+      hero?: (number | null) | Media;
+      seo_text?: string | null;
+      faq?:
+        | {
+            q: string;
+            a: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+    guides?: {
+      h1?: string | null;
+      intro?: string | null;
+      hero?: (number | null) | Media;
+      seo_text?: string | null;
+      faq?:
+        | {
+            q: string;
+            a: string;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  cancellation_policies?:
+    | {
+        key: string;
+        name?: string | null;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  og_default?: (number | null) | Media;
+  /**
+   * GTM-XXXXXXX
+   */
+  gtm_id?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  header?:
+    | {
+        label: string;
+        /**
+         * Path with trailing slash, e.g. /en/destinations/luxor/
+         */
+        href: string;
+        columns?:
+          | {
+              heading?: string | null;
+              links?:
+                | {
+                    label: string;
+                    /**
+                     * Path with trailing slash, e.g. /en/destinations/luxor/
+                     */
+                    href: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        panel_extra?: ('featured' | 'map' | 'latest_guides' | 'none') | null;
+        featured?:
+          | ({
+              relationTo: 'tours';
+              value: number | Tour;
+            } | null)
+          | ({
+              relationTo: 'cruises';
+              value: number | Cruise;
+            } | null)
+          | ({
+              relationTo: 'excursions';
+              value: number | Excursion;
+            } | null);
+        id?: string | null;
+      }[]
+    | null;
+  footer_columns?:
+    | {
+        heading: string;
+        links?:
+          | {
+              label: string;
+              /**
+               * Path with trailing slash, e.g. /en/destinations/luxor/
+               */
+              href: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  footer_description?: string | null;
+  legal_links?:
+    | {
+        label: string;
+        /**
+         * Path with trailing slash, e.g. /en/destinations/luxor/
+         */
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  whatsapp_number?: T;
+  whatsapp_message_default?: T;
+  contact_email?: T;
+  phone?: T;
+  address?: T;
+  reply_hours?: T;
+  legal_name?: T;
+  licence_number?: T;
+  social?:
+    | T
+    | {
+        network?: T;
+        url?: T;
+        id?: T;
+      };
+  booking_band?:
+    | T
+    | {
+        enabled?: T;
+        badge?: T;
+        title?: T;
+        text?: T;
+        primary_label?: T;
+        secondary_label?: T;
+      };
+  stats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  trust_items?:
+    | T
+    | {
+        icon?: T;
+        text?: T;
+        enabled?: T;
+        id?: T;
+      };
+  archive_intros?:
+    | T
+    | {
+        tours?:
+          | T
+          | {
+              h1?: T;
+              intro?: T;
+              hero?: T;
+              seo_text?: T;
+              faq?:
+                | T
+                | {
+                    q?: T;
+                    a?: T;
+                    id?: T;
+                  };
+            };
+        cruises?:
+          | T
+          | {
+              h1?: T;
+              intro?: T;
+              hero?: T;
+              seo_text?: T;
+              faq?:
+                | T
+                | {
+                    q?: T;
+                    a?: T;
+                    id?: T;
+                  };
+            };
+        excursions?:
+          | T
+          | {
+              h1?: T;
+              intro?: T;
+              hero?: T;
+              seo_text?: T;
+              faq?:
+                | T
+                | {
+                    q?: T;
+                    a?: T;
+                    id?: T;
+                  };
+            };
+        destinations?:
+          | T
+          | {
+              h1?: T;
+              intro?: T;
+              hero?: T;
+              seo_text?: T;
+              faq?:
+                | T
+                | {
+                    q?: T;
+                    a?: T;
+                    id?: T;
+                  };
+            };
+        guides?:
+          | T
+          | {
+              h1?: T;
+              intro?: T;
+              hero?: T;
+              seo_text?: T;
+              faq?:
+                | T
+                | {
+                    q?: T;
+                    a?: T;
+                    id?: T;
+                  };
+            };
+      };
+  cancellation_policies?:
+    | T
+    | {
+        key?: T;
+        name?: T;
+        text?: T;
+        id?: T;
+      };
+  og_default?: T;
+  gtm_id?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  header?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        columns?:
+          | T
+          | {
+              heading?: T;
+              links?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        panel_extra?: T;
+        featured?: T;
+        id?: T;
+      };
+  footer_columns?:
+    | T
+    | {
+        heading?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  footer_description?: T;
+  legal_links?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -328,6 +2622,39 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TripCardBlock".
+ */
+export interface TripCardBlock {
+  trip:
+    | {
+        relationTo: 'tours';
+        value: number | Tour;
+      }
+    | {
+        relationTo: 'cruises';
+        value: number | Cruise;
+      }
+    | {
+        relationTo: 'excursions';
+        value: number | Excursion;
+      };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'trip-card';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TipBoxBlock".
+ */
+export interface TipBoxBlock {
+  title?: string | null;
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'tip-box';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

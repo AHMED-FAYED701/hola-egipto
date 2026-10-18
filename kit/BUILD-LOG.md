@@ -31,3 +31,17 @@
 - Fixed during the step: NextURL drops the trailing slash on stringify, so the 308 target is built with `new URL()`; the SVG's own `<title>` is stripped so the page has one title.
 - Verified on the production build: visitor `/` → 503 + 3 headers; `payload-token=garbage` → 503; wrong preview key → 503, no cookie; preview link → 307 + cookie, cookie passes the gate; `/admin` 200, `/api/users` 403, robots/favicon/icon/apple-icon/manifest/brand/fonts 200; `/en?x=1` → 308 `/en/?x=1`.
 - DONE
+
+## 2026-10-18 — S3 · Content model
+- Collections: `tours`, `cruises`, `excursions` (shared trip fields in `src/fields/trip.ts`), `destinations`, `guides`, `pages`, `media`, taxonomies `durations`, `trip-styles`, `cruise-types`, `departures` (+ `destination`), `regions`, `guide-topics`, `inquiries`, `users`. Globals `site-settings`, `navigation`. Field names verbatim from spec §5 / contracts §4; facts shared, words localized.
+- Admin labels ES/EN; admin groups Viajes, Contenido, Taxonomías, Solicitudes, Ajustes.
+- `tours.beforeChange` sets `duration` from `duration_days` via the fixed ES slugs (≤6 / 7–9 / 10–12 / ≥13); `duration` is read-only in admin.
+- Validation: `subtitle` ≤ 90, `highlights` 3–8 (when available), `related_trips` max 3, `guide_topic` max 2, `gallery` max 15, `alt` required (localized), prices required when the trip is available in the locale being saved, slug format + unique per locale, `excerpt` ≤ 155.
+- Access: public read on content, taxonomies, media, globals; create/update/delete logged-in; `inquiries` admin-only; `users` read logged-in, create/delete admin.
+- Guides use Lexical with `trip-card` and `tip-box` blocks. Pages: `template` select, localized `layout` blocks (home/about sections), `faq_groups`, `last_updated`.
+- Media: `staticDir` = `media/` (gitignored); sizes card 640×480, tile 600×800, hero 1920×1080, hero-mobile 900×1125, gallery 1600w, all WebP.
+- Revalidation hooks on every content collection + globals revalidate the whole front-end layout and never throw outside Next. Defaulted: "affected paths" simplified to the whole site (small site, heavy cross-linking).
+- Migration `content_model` created (drizzle's interactive create/rename prompts answered "create" through a pty; no renames) and applied.
+- `pnpm hola:schema` written (§9): every collection, global and field A3 expects is listed; locales ["es","en"], default "es". Payload logger now writes to stderr so scripts print only JSON on stdout.
+- Lint, typecheck, build pass.
+- DONE
