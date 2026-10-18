@@ -130,3 +130,7 @@
 ## 2026-10-18 — S13 · Acceptance and report
 - Production build (`pnpm build`) + `pnpm start` (output appended to `kit/logs/server.log`), port 3000 checked free first.
 - Acceptance run 1 (before the S13 commit): `pass=138 fail=1 warn=0 blocked=9` — the only FAIL was A15 "12 commits (expected ≥ 13)", which is this step's own commit. No app fix needed.
+- Acceptance run 2 (after the S13 commit, production build): `ACCEPTANCE SUMMARY: pass=139 fail=0 warn=0 blocked=9`. The 9 BLOCKED are the owner inputs (WhatsApp, contact email, legal name, licence, GTM, ADMIN_EMAIL, SMTP, Turnstile, n8n).
+- `kit/BUILD-REPORT.md` written from `kit/docs/06-REPORT-TEMPLATE.md` (summary, how to review, environment, status by spec section, needs you + deployment items, draft copy, deviations with commit hashes, manual checks, acceptance table, script changes: none, rollback, next runs). No script changes.
+- Final sequence after this commit: `pnpm build`, `pnpm start` (appended to `kit/logs/server.log`), `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt`.
+- DONE
