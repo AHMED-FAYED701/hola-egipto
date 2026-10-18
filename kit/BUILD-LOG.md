@@ -126,3 +126,7 @@
 - Accessibility: axe-core 4 (installed in the scratchpad, injected into the review instance) on home, a tour, a filtered archive (EN), a guide (EN), Plan my trip (EN) and a destination → **0 violations** on every page. Visible focus rings (teal / sun-sand on dark), skip link, keyboard mega menu/drawer/accordions/tabs/lightbox, labelled fields, ≥44 px targets, `prefers-reduced-motion` via tokens.
 - Visual: 375 px tour page (no horizontal overflow, sticky price bar), 1280 px header with Spanish labels **and** a WhatsApp number set: the nav overflowed into the logo and switcher → fixed with tighter 1280–1439 spacing (logo 40 px, left-aligned nav, smaller toggles/buttons); measured afterwards: logo ends at 219 px, nav 231–843 px, actions from 863 px. Temporary number cleared afterwards.
 - DONE
+
+## 2026-10-18 — S13 · Acceptance and report
+- Production build (`pnpm build`) + `pnpm start` (output appended to `kit/logs/server.log`), port 3000 checked free first.
+- Acceptance run 1 (before the S13 commit): `pass=138 fail=1 warn=0 blocked=9` — the only FAIL was A15 "12 commits (expected ≥ 13)", which is this step's own commit. No app fix needed.
