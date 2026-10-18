@@ -45,3 +45,12 @@
 - `pnpm hola:schema` written (§9): every collection, global and field A3 expects is listed; locales ["es","en"], default "es". Payload logger now writes to stderr so scripts print only JSON on stdout.
 - Lint, typecheck, build pass.
 - DONE
+
+## 2026-10-18 — S4 · Internationalised routing
+- next-intl 4.14.9: `localePrefix: 'as-needed'`, `localeDetection: false`, `localeCookie: false`, `alternateLinks: false`, `pathnames` exactly per contracts §5 (`src/i18n/routing.ts`, `request.ts`, `navigation.ts`). Integrated in `src/proxy.ts` after the coming-soon gate and the trailing-slash 308.
+- Routes under `src/app/(frontend)/[locale]/`: home, 5 archives, 5 singles, 6 term landings, `search`, `[page]` (fixed pages), `[...rest]` catch-all (`notFound()`), `not-found.tsx`. All content routes are ISR (`generateStaticParams` → [] + on-demand rendering). No `loading.tsx`.
+- `src/lib/urls.ts` builds every localized URL (archives, docs, terms, fixed pages, search); `src/lib/data.ts` is the Local API data layer; `src/messages/es.json` / `en.json` hold the UI strings (key parity checked).
+- **Deviation (Next.js 16.4.2 behaviour):** a page-level `notFound()` renders Next's empty error shell (`<html id="__next_error__">`, no lang/h1) — reproduced in a minimal Next 16.4.2 app in the scratchpad (static, dynamic, ISR and generateMetadata variants), while a proxy `NextResponse.rewrite(url, { status: 404 })` serves full HTML. So the proxy answers unknown front-end URLs itself: `src/lib/route-match.ts` matches the path structurally and checks slugs against `/api/hola/routes` (index of existing slugs, cached 5 s in the proxy), then rewrites to the localized `/[locale]/hola-404/` page with status 404 (full layout, right `lang`, `noindex`). Pages still call `notFound()` as a backstop; junk paths with a dot never reach the database (`resolveLocale()` guards every page).
+- `agentRules: false` in next.config (Next 16 dev writes AGENTS.md otherwise).
+- Verified on the production build with the preview cookie: `/` lang es, `/en/` lang en, every archive and search 200 in both languages, unknown paths 404 with the localized page, `/viajes-a-egipto` → 308, `/es/…` → 307 to the unprefixed URL. Single/term/fixed-page routes answer 404 until content exists; they are verified with data in S6/S8.
+- DONE

@@ -42,6 +42,8 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   // Metadata must block rendering so notFound() yields a real 404 status.
   htmlLimitedBots: /.*/,
+  // Do not write AGENTS.md into the repository during `next dev`.
+  agentRules: false,
   images: {
     localPatterns: [{ pathname: '/api/media/file/**' }, { pathname: '/brand/**' }],
     formats: ['image/webp'],

@@ -1,5 +1,9 @@
 import { jwtVerify } from 'jose'
+import createIntlMiddleware from 'next-intl/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
+
+import { routing } from './i18n/routing'
+import { existsIn, matchPath, type RouteIndex } from './lib/route-match'
 
 import { flag, payloadJwtKey, previewCookieValue, safeEqual } from './lib/secrets'
 
@@ -11,6 +15,8 @@ const PASS_FILES = new Set([
   '/robots.txt',
   '/sitemap.xml',
 ])
+
+const intl = createIntlMiddleware(routing)
 
 const PREVIEW_COOKIE = 'hola_preview'
 const PREVIEW_PARAM = 'hola_preview'
@@ -45,6 +51,43 @@ async function hasAdminSession(req: NextRequest): Promise<boolean> {
 function hasPreviewCookie(req: NextRequest): boolean {
   const v = req.cookies.get(PREVIEW_COOKIE)?.value
   return Boolean(v) && safeEqual(v as string, previewCookieValue())
+}
+
+// Index of existing slugs (from /api/hola/routes), refreshed every few seconds.
+const INDEX_TTL_MS = 5000
+let indexCache: { at: number; index: RouteIndex | null } = { at: 0, index: null }
+
+async function routeIndex(req: NextRequest): Promise<RouteIndex | null> {
+  const now = Date.now()
+  const forced = (globalThis as { __holaRoutesStamp?: number }).__holaRoutesStamp || 0
+  if (indexCache.index && now - indexCache.at < INDEX_TTL_MS && forced < indexCache.at) return indexCache.index
+  try {
+    const res = await fetch(new URL('/api/hola/routes', req.nextUrl.origin), { cache: 'no-store', signal: AbortSignal.timeout(5000) })
+    if (!res.ok) return indexCache.index
+    indexCache = { at: now, index: (await res.json()) as RouteIndex }
+  } catch {
+    // keep the previous index; pages still call notFound() as a backstop
+  }
+  return indexCache.index
+}
+
+/**
+ * Next.js 16 renders a page-level notFound() as an empty error shell, so unknown front-end URLs are
+ * answered here instead: a rewrite to the localized 404 page with status 404 (full layout, lang, noindex).
+ */
+async function notFoundResponse(req: NextRequest): Promise<NextResponse | null> {
+  const { pathname } = req.nextUrl
+  const m = matchPath(pathname)
+  const locale = m?.locale ?? (pathname.startsWith('/en/') ? 'en' : 'es')
+  if (m) {
+    if (m.kind === 'home' || m.kind === 'archive' || m.kind === 'search') return null
+    const index = await routeIndex(req)
+    if (!index || existsIn(index, m)) return null
+  }
+  const url = req.nextUrl.clone()
+  url.pathname = `/${locale}/hola-404/`
+  url.search = ''
+  return NextResponse.rewrite(url, { status: 404 })
 }
 
 function comingSoon(req: NextRequest) {
@@ -94,7 +137,14 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(target, 308)
   }
 
-  return NextResponse.next()
+  // "/es/…" is redirected to the unprefixed URL by next-intl before it is checked.
+  if (!(pathname === '/es/' || pathname.startsWith('/es/'))) {
+    const missing = await notFoundResponse(req)
+    if (missing) return missing
+  }
+
+  // Localized routing (next-intl) runs after the coming-soon gate.
+  return intl(req)
 }
 
 export const config = {
