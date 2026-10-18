@@ -1,0 +1,47 @@
+.banner {
+  position: fixed;
+  left: var(--he-space-4);
+  right: var(--he-space-4);
+  bottom: var(--he-space-4);
+  z-index: 90;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding: var(--he-space-5);
+  background: var(--he-linen);
+  color: var(--he-deep-oasis);
+  border: 1px solid var(--he-line);
+  border-radius: var(--he-radius-lg);
+  box-shadow: var(--he-shadow-lg);
+}
+.banner h2 {
+  font-size: var(--he-text-h4);
+  margin-bottom: var(--he-space-2);
+}
+.banner p {
+  font-size: var(--he-text-small);
+  margin-bottom: var(--he-space-4);
+}
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--he-space-3);
+}
+/* "Reject all" is exactly as prominent as "Accept all" (AEPD) */
+.buttons button {
+  min-height: 48px;
+  border: 2px solid var(--he-nile-teal);
+  border-radius: var(--he-radius-sm);
+  background: var(--he-nile-teal);
+  color: var(--he-papyrus);
+  font-weight: 600;
+  cursor: pointer;
+}
+.buttons button:hover {
+  background: var(--he-nile-deep);
+  border-color: var(--he-nile-deep);
+}
+@media (max-width: 1023px) {
+  .banner {
+    bottom: 5.5rem;
+  }
+}

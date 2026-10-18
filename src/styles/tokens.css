@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Hola Egipto — brand tokens
+   The only source of colour, type scale, spacing, radius, shadow and motion.
+   Every text pair below passes WCAG AA (ratio noted).
+   In the Next.js app: import this file once in the root layout. Fonts come from the
+   self-hosted @font-face rules in fonts.css (kit/docs/03-CONTRACTS.md §17).
+   ========================================================================== */
+
+:root {
+  /* Core palette */
+  --he-deep-oasis:   #133232; /* ink, dark sections, footer      — 12.2:1 on papyrus */
+  --he-nile-teal:    #145B6B; /* primary brand, links, logo      —  6.8:1 on papyrus */
+  --he-nile-deep:    #0C3B47; /* hover / pressed teal                                 */
+  --he-terracotta:   #B5572A; /* primary CTA background          —  4.8:1 with white  */
+  --he-sun-sand:     #E0B57C; /* accent, sun, rules, on-dark text —  7.2:1 on oasis   */
+  --he-papyrus:      #F7F1E6; /* page background                                      */
+  --he-linen:        #FDFAF3; /* cards, light surfaces                                */
+
+  /* Text-safe variants for small text on light backgrounds */
+  --he-terracotta-ink: #A84F25; /* eyebrows, small labels        —  4.9:1 on papyrus */
+  --he-sand-ink:       #8C6235; /* captions, meta                —  4.8:1 on papyrus */
+  --he-stone:          #5B6664; /* body secondary / muted        —  5.3:1 on papyrus */
+
+  /* Tints */
+  --he-terracotta-50: #F6EADF;  /* "Coming soon" badge background */
+  --he-teal-50:       #E3EEEE;
+  --he-sand-100:      #F1E3CC;
+  --he-line:          #E4D8C2;  /* borders, dividers on papyrus */
+  --he-line-dark:     #1F4747;  /* borders on deep oasis        */
+
+  /* Functional — WhatsApp green is used ONLY on WhatsApp buttons/icons */
+  --he-whatsapp: #25D366;
+  --he-success:  #2E7D5B;
+  --he-error:    #B3261E;
+
+  /* Typography */
+  --he-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --he-font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Fluid type scale (mobile → desktop) */
+  --he-text-display: clamp(2.5rem, 1.6rem + 3.6vw, 4.25rem); /* hero H1   40 → 68 */
+  --he-text-h1: clamp(2.125rem, 1.5rem + 2.4vw, 3.5rem);     /* page H1   34 → 56 */
+  --he-text-h2: clamp(1.75rem, 1.35rem + 1.6vw, 2.625rem);   /* section   28 → 42 */
+  --he-text-h3: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem);    /* card      22 → 28 */
+  --he-text-h4: 1.25rem;                                     /*           20      */
+  --he-text-lead: clamp(1.125rem, 1.05rem + 0.3vw, 1.3125rem);
+  --he-text-body: 1.0625rem;                                 /*           17      */
+  --he-text-small: 0.9375rem;                                /*           15      */
+  --he-text-eyebrow: 0.875rem;                               /*           14, caps */
+
+  --he-leading-tight: 1.12;
+  --he-leading-snug: 1.3;
+  --he-leading-body: 1.65;
+  --he-tracking-eyebrow: 0.08em;
+  --he-tracking-tagline: 0.42em;
+
+  /* Spacing (4px base) */
+  --he-space-1: 0.25rem;  --he-space-2: 0.5rem;  --he-space-3: 0.75rem;
+  --he-space-4: 1rem;     --he-space-5: 1.5rem;  --he-space-6: 2rem;
+  --he-space-7: 3rem;     --he-space-8: 4rem;    --he-space-9: 6rem;
+  --he-section-y: clamp(4rem, 2.5rem + 6vw, 7.5rem);
+  --he-container: 1200px;
+  --he-gutter: clamp(1rem, 0.5rem + 2vw, 2rem);
+
+  /* Shape */
+  --he-radius-sm: 4px;    /* buttons, inputs (the mockup's near-square CTA) */
+  --he-radius-md: 10px;   /* cards, images                                   */
+  --he-radius-lg: 18px;   /* feature panels                                  */
+  --he-radius-pill: 999px;/* badges, chips                                   */
+
+  /* Elevation */
+  --he-shadow-sm: 0 1px 2px rgb(19 50 50 / 0.06), 0 1px 1px rgb(19 50 50 / 0.04);
+  --he-shadow-md: 0 8px 24px -8px rgb(19 50 50 / 0.18);
+  --he-shadow-lg: 0 24px 48px -16px rgb(19 50 50 / 0.25);
+
+  /* Motion */
+  --he-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --he-dur: 200ms;
+
+  /* Pattern tiles. In the app, copy 03-pattern/*-tile.svg to public/brand/pattern/ */
+  --he-pattern-papyrus: url('/brand/pattern/hola-egipto-pattern-papyrus-tile.svg');
+  --he-pattern-deep: url('/brand/pattern/hola-egipto-pattern-deep-tile.svg');
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --he-dur: 0ms; }
+}
+
+/* Reference usage ---------------------------------------------------------- */
+body { background: var(--he-papyrus); color: var(--he-deep-oasis);
+       font: 400 var(--he-text-body)/var(--he-leading-body) var(--he-font-sans); }
+h1, h2, h3 { font-family: var(--he-font-display); font-weight: 600; line-height: var(--he-leading-tight);
+             color: var(--he-deep-oasis); letter-spacing: -0.01em; }
+.he-eyebrow { font: 600 var(--he-text-eyebrow)/1.2 var(--he-font-sans); text-transform: uppercase;
+              letter-spacing: var(--he-tracking-eyebrow); color: var(--he-terracotta-ink); }
+.he-btn-primary { background: var(--he-terracotta); color: #fff; border-radius: var(--he-radius-sm);
+                  font: 600 1rem/1 var(--he-font-sans); padding: 1rem 1.75rem; }
+.he-btn-primary:hover { background: var(--he-terracotta-ink); }
+.he-badge { background: var(--he-terracotta-50); color: var(--he-terracotta-ink); border-radius: var(--he-radius-pill);
+            font: 700 0.75rem/1 var(--he-font-sans); letter-spacing: 0.08em; text-transform: uppercase; padding: .5rem .875rem; }
+.he-section-dark { background: var(--he-deep-oasis) var(--he-pattern-deep) repeat; background-size: 160px; color: var(--he-papyrus); }
+:focus-visible { outline: 2px solid var(--he-nile-teal); outline-offset: 2px; }
+.he-section-dark :focus-visible { outline-color: var(--he-sun-sand); }

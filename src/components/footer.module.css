@@ -1,0 +1,124 @@
+.footer {
+  background: var(--he-deep-oasis) var(--he-pattern-deep) repeat;
+  background-size: 160px;
+  color: var(--he-papyrus);
+  padding-top: var(--he-space-8);
+  margin-top: auto;
+}
+.footer a {
+  color: var(--he-papyrus);
+  text-decoration: none;
+}
+.footer a:hover {
+  color: var(--he-sun-sand);
+  text-decoration: underline;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, 1fr);
+  gap: var(--he-space-7);
+  padding-bottom: var(--he-space-8);
+}
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 599px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+.brand img {
+  width: 150px;
+  height: auto;
+  margin-bottom: var(--he-space-4);
+}
+.brand p {
+  color: var(--he-papyrus);
+  max-width: 22rem;
+}
+.contact {
+  display: grid;
+  gap: var(--he-space-2);
+  margin-top: var(--he-space-4);
+}
+.contact a,
+.contact span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--he-space-2);
+  min-height: 44px;
+}
+.contact svg {
+  color: var(--he-sun-sand);
+}
+.col h2 {
+  font: 600 var(--he-text-eyebrow) / 1.2 var(--he-font-sans);
+  text-transform: uppercase;
+  letter-spacing: var(--he-tracking-eyebrow);
+  color: var(--he-sun-sand);
+  margin-bottom: var(--he-space-4);
+}
+.col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.col li a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+}
+.bottom {
+  border-top: 1px solid var(--he-line-dark);
+  padding: var(--he-space-5) 0 var(--he-space-6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--he-space-4);
+  font-size: var(--he-text-small);
+}
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--he-space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.legal a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+}
+.company {
+  color: var(--he-papyrus);
+  margin: 0;
+}
+.switcher {
+  display: flex;
+  gap: 2px;
+  font-weight: 600;
+}
+.switcher a,
+.switcher span {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.switcher span {
+  color: var(--he-sun-sand);
+}
+.linkBtn {
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 44px;
+  color: var(--he-papyrus);
+  text-decoration: underline;
+  cursor: pointer;
+}

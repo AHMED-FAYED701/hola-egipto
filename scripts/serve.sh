@@ -10,7 +10,9 @@ stop() {
   pids=$(ss -ltnpH 'sport = :3000' 2>/dev/null | grep -oE 'pid=[0-9]+' | cut -d= -f2 | sort -u)
   # shellcheck disable=SC2086
   [ -n "$pids" ] && kill $pids 2>/dev/null
-  pkill -f 'next start' 2>/dev/null
+  for port in 3000 3002; do
+    for pid in $(ss -ltnpH "sport = :$port" 2>/dev/null | grep -oE 'pid=[0-9]+' | cut -d= -f2 | sort -u); do kill "$pid" 2>/dev/null; done
+  done
   for _ in $(seq 1 40); do
     ss -ltn | grep -q ':3000 ' || { echo "server stopped"; return 0; }
     sleep 0.5
@@ -36,7 +38,15 @@ start() {
   return 1
 }
 
+# Review instance on :3002 with the coming-soon gate off (process env only; .env.local untouched).
+visual() {
+  ss -ltn | grep -q ':3002 ' && return 0
+  HOLA_COMING_SOON=0 setsid nohup pnpm exec next start -p 3002 >> kit/logs/visual.log 2>&1 < /dev/null &
+  for _ in $(seq 1 60); do curl -s -o /dev/null http://localhost:3002/robots.txt && { echo "visual up"; return 0; }; sleep 0.5; done
+}
+
 case "${1:-start}" in
+  visual) visual ;;
   start) start ;;
   stop) stop ;;
   restart) stop; start ;;

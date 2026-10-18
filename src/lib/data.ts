@@ -1,6 +1,6 @@
 import 'server-only'
 
-import type { CollectionSlug, DataFromCollectionSlug, Where } from 'payload'
+import type { DataFromCollectionSlug, PaginatedDocs, Where } from 'payload'
 import { cache } from 'react'
 
 import type { Locale } from '@/i18n/routing'
@@ -17,7 +17,7 @@ export const getSettings = cache(async (locale: Locale) => {
 
 export const getNavigation = cache(async (locale: Locale) => {
   const payload = await getPayloadClient()
-  return payload.findGlobal({ slug: 'navigation', locale, depth: 1 })
+  return payload.findGlobal({ slug: 'navigation', locale, depth: 2 })
 })
 
 const availableWhere = (extra?: Where): Where => (extra ? { and: [{ available: { equals: true } }, extra] } : { available: { equals: true } })
@@ -81,7 +81,11 @@ export const listTerms = cache(async (taxonomy: TaxonomyCollection, locale: Loca
   return res.docs
 })
 
-export async function listAvailable(collection: CollectionSlug, locale: Locale, opts: { where?: Where; limit?: number; sort?: string; depth?: number; page?: number } = {}) {
+export async function listAvailable<C extends ContentCollection | 'pages'>(
+  collection: C,
+  locale: Locale,
+  opts: { where?: Where; limit?: number; sort?: string; depth?: number; page?: number } = {},
+): Promise<PaginatedDocs<DataFromCollectionSlug<C>>> {
   const payload = await getPayloadClient()
   return payload.find({
     collection: collection as ContentCollection,
@@ -91,7 +95,7 @@ export async function listAvailable(collection: CollectionSlug, locale: Locale, 
     page: opts.page,
     sort: opts.sort,
     where: availableWhere(opts.where),
-  })
+  }) as unknown as Promise<PaginatedDocs<DataFromCollectionSlug<C>>>
 }
 
 export const findPageByTemplate = cache(async (template: string, locale: Locale, depth = 2) => {

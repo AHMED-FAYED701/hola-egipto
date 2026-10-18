@@ -1,0 +1,180 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--he-linen);
+  border-radius: var(--he-radius-md);
+  box-shadow: var(--he-shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--he-dur) var(--he-ease), transform var(--he-dur) var(--he-ease);
+}
+.card:hover,
+.card:focus-within {
+  box-shadow: var(--he-shadow-md);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card:hover {
+    transform: translateY(-2px);
+  }
+}
+.media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--he-deep-oasis);
+}
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--he-space-2);
+  padding: var(--he-space-5);
+  flex: 1;
+}
+.title {
+  font-size: var(--he-text-h4);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* The whole card is clickable via the title link */
+.title a {
+  color: var(--he-deep-oasis);
+  text-decoration: none;
+}
+.title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--he-radius-md);
+}
+.title a:focus-visible {
+  outline: none;
+}
+.title a:focus-visible::after {
+  outline: 2px solid var(--he-nile-teal);
+  outline-offset: 2px;
+}
+.chip {
+  position: absolute;
+  left: var(--he-space-3);
+  top: var(--he-space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--he-space-1);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--he-radius-pill);
+  background: var(--he-linen);
+  color: var(--he-deep-oasis);
+  font-size: var(--he-text-small);
+  font-weight: 600;
+}
+.chip svg {
+  width: 16px;
+  height: 16px;
+  color: var(--he-nile-teal);
+}
+.dests {
+  color: var(--he-stone);
+  font-size: var(--he-text-small);
+  margin: 0;
+}
+.price {
+  margin-top: auto;
+  padding-top: var(--he-space-3);
+  border-top: 1px solid var(--he-line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--he-space-2);
+  font-size: var(--he-text-small);
+  color: var(--he-stone);
+}
+.price strong {
+  font: 600 1.375rem/1.2 var(--he-font-display);
+  color: var(--he-deep-oasis);
+}
+
+/* Destination tile 3:4 with overlay */
+.tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--he-radius-md);
+  overflow: hidden;
+  background: var(--he-deep-oasis);
+  color: var(--he-papyrus);
+  text-decoration: none;
+  box-shadow: var(--he-shadow-sm);
+}
+.tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform calc(var(--he-dur) * 2) var(--he-ease);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tile:hover img {
+    transform: scale(1.03);
+  }
+}
+.tileText {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--he-space-7) var(--he-space-5) var(--he-space-5);
+  background: linear-gradient(to top, rgb(19 50 50 / 0.92) 0%, rgb(19 50 50 / 0.6) 60%, rgb(19 50 50 / 0) 100%);
+}
+.tileText h3 {
+  color: var(--he-papyrus);
+  margin: 0 0 var(--he-space-1);
+  font-size: var(--he-text-h3);
+}
+.tileText p {
+  margin: 0;
+  color: var(--he-sun-sand);
+  font-size: var(--he-text-small);
+}
+.tile:hover,
+.tile:focus-visible {
+  color: var(--he-papyrus);
+}
+
+.meta {
+  color: var(--he-sand-ink);
+  font-size: var(--he-text-small);
+  margin: 0;
+}
+.excerpt {
+  color: var(--he-stone);
+  margin: 0;
+}
+
+/* Small horizontal card (menu panels) */
+.mini {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--he-space-3);
+  align-items: center;
+  text-decoration: none;
+  color: var(--he-deep-oasis);
+}
+.mini img {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--he-radius-sm);
+}
+.mini strong {
+  display: block;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.mini span {
+  font-size: var(--he-text-small);
+  color: var(--he-stone);
+}

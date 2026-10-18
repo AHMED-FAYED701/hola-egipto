@@ -1,0 +1,480 @@
+/* Hola Egipto — global base. Every value comes from tokens.css (--he-*). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 6rem;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+main {
+  flex: 1 0 auto;
+  display: block;
+}
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+h1,
+h2,
+h3,
+h4 {
+  margin: 0 0 var(--he-space-4);
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--he-text-h1);
+}
+h2 {
+  font-size: var(--he-text-h2);
+}
+h3 {
+  font-size: var(--he-text-h3);
+  line-height: var(--he-leading-snug);
+}
+h4 {
+  font: 600 var(--he-text-h4) / var(--he-leading-snug) var(--he-font-display);
+}
+p {
+  margin: 0 0 var(--he-space-4);
+}
+a {
+  color: var(--he-nile-teal);
+  text-underline-offset: 0.18em;
+  transition: color var(--he-dur) var(--he-ease);
+}
+a:hover {
+  color: var(--he-nile-deep);
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--he-nile-teal);
+  outline-offset: 2px;
+}
+.he-dark :focus-visible,
+.he-section-dark :focus-visible {
+  outline-color: var(--he-sun-sand);
+}
+
+/* Skip link: the first focusable element on every page */
+.skip-link {
+  position: absolute;
+  left: var(--he-space-4);
+  top: -100px;
+  z-index: 1000;
+  padding: var(--he-space-3) var(--he-space-5);
+  background: var(--he-deep-oasis);
+  color: var(--he-papyrus);
+  border-radius: var(--he-radius-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: var(--he-space-4);
+  color: var(--he-papyrus);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Layout */
+.container {
+  width: 100%;
+  max-width: calc(var(--he-container) + 2 * var(--he-gutter));
+  margin-inline: auto;
+  padding-inline: var(--he-gutter);
+}
+.container--narrow {
+  max-width: calc(46rem + 2 * var(--he-gutter));
+}
+.section {
+  padding-block: var(--he-section-y);
+}
+.section--tight {
+  padding-block: calc(var(--he-section-y) / 2);
+}
+.section--linen {
+  background: var(--he-linen);
+}
+.section-head {
+  max-width: 46rem;
+  margin-bottom: var(--he-space-7);
+}
+.section-head p {
+  color: var(--he-stone);
+  font-size: var(--he-text-lead);
+}
+.section-head--row {
+  max-width: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--he-space-4);
+}
+.section-head--row > div {
+  max-width: 46rem;
+}
+.lead {
+  font-size: var(--he-text-lead);
+  color: var(--he-stone);
+}
+.muted {
+  color: var(--he-stone);
+}
+.caption {
+  color: var(--he-sand-ink);
+  font-size: var(--he-text-small);
+}
+.grid {
+  display: grid;
+  gap: var(--he-space-6);
+}
+.grid--3 {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+.grid--4 {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+}
+.divider {
+  height: 12px;
+  border: 0;
+  margin: 0;
+  background: url('/brand/pattern/hola-egipto-divider-teal.svg') repeat-x center / auto 12px;
+  opacity: 0.6;
+}
+
+/* Eyebrow, badge */
+.he-eyebrow {
+  display: block;
+  margin-bottom: var(--he-space-3);
+}
+.he-dark .he-eyebrow {
+  color: var(--he-sun-sand);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--he-space-2);
+  min-height: 48px;
+  padding: 0.875rem 1.5rem;
+  border: 2px solid transparent;
+  border-radius: var(--he-radius-sm);
+  font: 600 1rem/1.1 var(--he-font-sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--he-dur) var(--he-ease),
+    color var(--he-dur) var(--he-ease),
+    border-color var(--he-dur) var(--he-ease);
+}
+.btn svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.btn--primary {
+  background: var(--he-terracotta);
+  color: #fff;
+}
+.btn--primary:hover {
+  background: var(--he-terracotta-ink);
+  color: #fff;
+}
+.btn--outline {
+  background: transparent;
+  color: var(--he-nile-teal);
+  border-color: var(--he-nile-teal);
+}
+.btn--outline:hover {
+  background: var(--he-teal-50);
+  color: var(--he-nile-deep);
+}
+.btn--light {
+  background: transparent;
+  color: var(--he-papyrus);
+  border-color: var(--he-papyrus);
+}
+.btn--light:hover {
+  background: var(--he-line-dark);
+  color: var(--he-papyrus);
+}
+.btn--whatsapp {
+  background: var(--he-whatsapp);
+  color: var(--he-deep-oasis);
+}
+.btn--whatsapp:hover {
+  background: var(--he-whatsapp);
+  color: var(--he-deep-oasis);
+  filter: brightness(0.95);
+}
+.btn--block {
+  width: 100%;
+}
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--he-space-3);
+}
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--he-space-1);
+  font-weight: 600;
+  min-height: 44px;
+}
+
+/* Chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--he-space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--he-space-1);
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--he-radius-pill);
+  background: var(--he-teal-50);
+  color: var(--he-nile-deep);
+  font-size: var(--he-text-small);
+  font-weight: 500;
+  line-height: 1.2;
+}
+.chip svg {
+  width: 16px;
+  height: 16px;
+}
+a.chip {
+  text-decoration: none;
+  min-height: 44px;
+  padding-inline: 1rem;
+}
+a.chip[aria-current='page'] {
+  background: var(--he-nile-teal);
+  color: var(--he-papyrus);
+}
+
+/* [pendiente] marker: impossible to miss in review */
+.pending {
+  display: inline-block;
+  padding: 0 0.35em;
+  border: 2px dashed var(--he-terracotta-ink);
+  border-radius: var(--he-radius-sm);
+  color: var(--he-terracotta-ink);
+  font-weight: 600;
+}
+.he-dark .pending {
+  border-color: var(--he-sun-sand);
+  color: var(--he-sun-sand);
+}
+.draft-note {
+  display: inline-block;
+  margin-bottom: var(--he-space-3);
+  font-size: var(--he-text-small);
+  color: var(--he-terracotta-ink);
+  border: 1px dashed var(--he-terracotta-ink);
+  border-radius: var(--he-radius-pill);
+  padding: 0.125rem 0.625rem;
+}
+
+/* Rich text */
+.prose {
+  max-width: 44rem;
+}
+.prose h2 {
+  margin-top: var(--he-space-7);
+}
+.prose h3 {
+  margin-top: var(--he-space-6);
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.25rem;
+  margin: 0 0 var(--he-space-4);
+}
+.prose li {
+  margin-bottom: var(--he-space-2);
+}
+.prose blockquote {
+  margin: var(--he-space-6) 0;
+  padding-left: var(--he-space-5);
+  border-left: 3px solid var(--he-sun-sand);
+  font: italic 400 var(--he-text-lead) / var(--he-leading-snug) var(--he-font-display);
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--he-space-5);
+}
+.prose th,
+.prose td {
+  text-align: left;
+  padding: var(--he-space-2) var(--he-space-3);
+  border-bottom: 1px solid var(--he-line);
+}
+
+/* Native accordions (itinerary, FAQ) */
+.accordion {
+  border-top: 1px solid var(--he-line);
+}
+.accordion details {
+  border-bottom: 1px solid var(--he-line);
+}
+.accordion summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--he-space-4);
+  min-height: 56px;
+  padding: var(--he-space-3) 0;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+}
+.accordion summary::-webkit-details-marker {
+  display: none;
+}
+.accordion summary::after {
+  content: '';
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--he-nile-teal);
+  border-bottom: 2px solid var(--he-nile-teal);
+  transform: rotate(45deg);
+  transition: transform var(--he-dur) var(--he-ease);
+}
+.accordion details[open] > summary::after {
+  transform: rotate(-135deg);
+}
+.accordion .accordion-body {
+  padding: 0 0 var(--he-space-5);
+}
+
+/* Forms (shared) */
+.field {
+  display: grid;
+  gap: var(--he-space-2);
+  margin-bottom: var(--he-space-5);
+}
+.field label,
+.field legend {
+  font-weight: 600;
+}
+.field input[type='text'],
+.field input[type='email'],
+.field input[type='tel'],
+.field input[type='number'],
+.field input[type='date'],
+.field input[type='month'],
+.field input[type='search'],
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--he-stone);
+  border-radius: var(--he-radius-sm);
+  background: var(--he-linen);
+}
+.field textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+.field .hint {
+  color: var(--he-stone);
+  font-size: var(--he-text-small);
+}
+.field .error {
+  color: var(--he-error);
+  font-size: var(--he-text-small);
+  font-weight: 600;
+}
+.field [aria-invalid='true'] {
+  border-color: var(--he-error);
+}
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--he-space-3);
+  min-height: 44px;
+  padding: var(--he-space-2) 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+.check input {
+  width: 22px;
+  height: 22px;
+  margin: 0.15rem 0 0;
+  accent-color: var(--he-nile-teal);
+  flex: none;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Breadcrumbs */
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--he-space-1);
+  list-style: none;
+  margin: 0;
+  padding: var(--he-space-4) 0 0;
+  font-size: var(--he-text-small);
+  color: var(--he-stone);
+}
+.breadcrumbs li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--he-space-1);
+}
+.breadcrumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.breadcrumbs svg {
+  color: var(--he-sand-ink);
+}

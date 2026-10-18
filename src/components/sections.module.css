@@ -1,0 +1,104 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--he-space-4);
+  margin: 0;
+  padding: var(--he-space-5) var(--he-space-6);
+  background: var(--he-linen);
+  border-radius: var(--he-radius-md);
+  box-shadow: var(--he-shadow-md);
+  list-style: none;
+}
+.stats li {
+  display: grid;
+  gap: var(--he-space-1);
+}
+.stats strong {
+  font: 600 clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem) / 1.1 var(--he-font-display);
+  color: var(--he-nile-teal);
+}
+.stats span {
+  font-size: var(--he-text-small);
+  color: var(--he-stone);
+}
+@media (max-width: 599px) {
+  .stats {
+    grid-template-columns: 1fr;
+    padding: var(--he-space-4) var(--he-space-5);
+  }
+}
+
+.band {
+  background: var(--he-deep-oasis) var(--he-pattern-deep) repeat;
+  background-size: 160px;
+  color: var(--he-papyrus);
+}
+.band h2 {
+  color: var(--he-papyrus);
+}
+.band p {
+  color: var(--he-papyrus);
+}
+.bandInner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: var(--he-space-6);
+  align-items: center;
+}
+@media (max-width: 899px) {
+  .bandInner {
+    grid-template-columns: 1fr;
+  }
+}
+.badge {
+  display: inline-block;
+  margin-bottom: var(--he-space-4);
+}
+.bandActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--he-space-3);
+  justify-content: flex-end;
+}
+@media (max-width: 899px) {
+  .bandActions {
+    justify-content: flex-start;
+  }
+}
+
+.trust {
+  background: var(--he-deep-oasis);
+  color: var(--he-papyrus);
+  border-top: 1px solid var(--he-line-dark);
+}
+.trust ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--he-space-4) var(--he-space-8);
+  list-style: none;
+  margin: 0;
+  padding: var(--he-space-5) 0;
+}
+.trust li {
+  display: flex;
+  align-items: center;
+  gap: var(--he-space-3);
+  font-weight: 500;
+}
+.trust svg {
+  color: var(--he-sun-sand);
+}
+
+.cta {
+  text-align: center;
+}
+.cta p {
+  max-width: 36rem;
+  margin-inline: auto;
+  margin-bottom: var(--he-space-6);
+  font-size: var(--he-text-lead);
+}
+.cta .ctaActions {
+  justify-content: center;
+}
