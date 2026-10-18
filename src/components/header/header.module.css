@@ -335,25 +335,39 @@
   }
 }
 
-/* 1280–1439: keep the full header within the container with Spanish labels */
+/* 1280–1439: keep the full header within the container with Spanish labels and the WhatsApp button */
 @media (max-width: 1439px) {
   .bar {
-    gap: var(--he-space-4);
+    gap: var(--he-space-3);
   }
   .logo img {
-    height: 44px;
+    height: 40px;
+  }
+  .navList {
+    justify-content: flex-start;
+    gap: 0;
   }
   .navLink {
     font-size: 0.875rem;
     padding-left: var(--he-space-2);
   }
   .toggle {
-    width: 28px;
+    width: 24px;
+  }
+  .toggle svg {
+    width: 16px;
+    height: 16px;
   }
   .actions {
     gap: var(--he-space-2);
   }
+  .switcher a,
+  .switcher span {
+    min-width: 36px;
+    padding: 0 4px;
+  }
   .actions :global(.btn) {
-    padding-inline: 1rem;
+    padding-inline: 0.875rem;
+    font-size: 0.9375rem;
   }
 }

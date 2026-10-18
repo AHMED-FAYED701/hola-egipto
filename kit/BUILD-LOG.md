@@ -119,3 +119,10 @@
 - Defaulted: no GTM `<noscript>` iframe (it would load the container without consent).
 - Browser check (Playwright, review instance): Reject all → cookie `hola_consent=denied`, `consent update` + `consent_update` in dataLayer, banner closed; no console errors.
 - DONE
+
+## 2026-10-18 — S12 · Security, performance and accessibility pass
+- Security (contracts §11): `poweredByHeader: false`; nosniff, Referrer-Policy, Permissions-Policy, X-Frame-Options and CSP-Report-Only on every response; logged-out `GET /api/users` and `/api/inquiries` → 403; no kit file served (probes 404); `git ls-files` has only `.env.example`; no users created except temporary `@hola.test` test sessions (deleted).
+- Performance (A13 on the production build): home CSS and first-load JS within budget, no jQuery, exactly 2 font preloads, favicon/apple-touch/manifest links, hero `fetchpriority="high"` (eager), below-the-fold images lazy, galleries via CSS scroll-snap + `<dialog>` (no carousel library), static SVG maps (no Maps JS), named `lucide-react` imports.
+- Accessibility: axe-core 4 (installed in the scratchpad, injected into the review instance) on home, a tour, a filtered archive (EN), a guide (EN), Plan my trip (EN) and a destination → **0 violations** on every page. Visible focus rings (teal / sun-sand on dark), skip link, keyboard mega menu/drawer/accordions/tabs/lightbox, labelled fields, ≥44 px targets, `prefers-reduced-motion` via tokens.
+- Visual: 375 px tour page (no horizontal overflow, sticky price bar), 1280 px header with Spanish labels **and** a WhatsApp number set: the nav overflowed into the logo and switcher → fixed with tighter 1280–1439 spacing (logo 40 px, left-aligned nav, smaller toggles/buttons); measured afterwards: logo ends at 219 px, nav 231–843 px, actions from 863 px. Temporary number cleared afterwards.
+- DONE
