@@ -111,3 +111,11 @@
 - JSON-LD: TravelAgency everywhere, BreadcrumbList on every page except home, TouristTrip, TouristDestination, Article, FAQPage; no AggregateRating/Review.
 - Verified with `ACCEPT_SKIP_GATES=1 bash kit/bin/acceptance.sh`: all A7 page checks pass on the 104 URLs, filtered archive, robots and sitemap; only A15 (commit count / uncommitted file) failed, as expected before S13.
 - DONE
+
+## 2026-10-18 — S11 · Tracking and consent
+- Already wired in S7–S9 and verified here: raw inline dataLayer bootstrap + Consent Mode v2 defaults (all four `denied`) as the only inline script in `<head>`; returning visitors with `hola_consent=granted` get a consent update before any tag; GTM snippet only when `gtm_id` is set (tested with a temporary `GTM-TEST123`, then cleared); own translated banner after `<main>` with "Reject all" styled exactly like "Accept all", choice stored in `hola_consent` (12 months) + `consent_update` push; "Cookie settings" in the footer reopens it.
+- Events: `view_item` server-rendered on all 18 trip URLs; `whatsapp_click` (location, trip_id, language) and `language_switch` (from, to) via `data-he-*` click delegation; `plan_trip_start` / `plan_trip_step`; `generate_lead` once per ref; `filter_use` on archive filter submit; `search` on search results.
+- Cookie policy page lists `hola_consent`, `hola_preview`, `payload-token`.
+- Defaulted: no GTM `<noscript>` iframe (it would load the container without consent).
+- Browser check (Playwright, review instance): Reject all → cookie `hola_consent=denied`, `consent update` + `consent_update` in dataLayer, banner closed; no console errors.
+- DONE
