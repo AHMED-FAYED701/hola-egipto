@@ -1,0 +1,31 @@
+.hero {
+  position: relative;
+  background: var(--he-deep-oasis) var(--he-pattern-deep) repeat;
+  background-size: 160px;
+  color: var(--he-papyrus);
+  overflow: hidden;
+}
+.bg {
+  object-fit: cover;
+}
+.withImage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgb(19 50 50 / 0.62);
+}
+.inner {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(3rem, 2rem + 5vw, 6rem);
+}
+.inner h1 {
+  color: var(--he-papyrus);
+  max-width: 48rem;
+}
+.intro {
+  max-width: 40rem;
+  font-size: var(--he-text-lead);
+  color: var(--he-papyrus);
+  margin: 0;
+}

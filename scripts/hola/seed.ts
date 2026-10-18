@@ -35,7 +35,9 @@ async function seedTerms(payload: Payload) {
   }
 }
 
-async function seedSettings(payload: Payload) {
+const ARCHIVE_HEROES: Record<string, string> = { tours: 'hero-tours', cruises: 'hero-cruises', excursions: 'hero-excursions', destinations: 'hero-destinations', guides: 'hero-guides' }
+
+async function seedSettings(payload: Payload, media: Record<string, number>) {
   const s = SETTINGS
   const intros = s.archive_intros.es
   // The en archive intros are written with the same structure from the faq helper output.
@@ -52,7 +54,7 @@ async function seedSettings(payload: Payload) {
       booking_band: s.booking_band.es,
       stats: s.stats.es,
       trust_items: s.trust_items.es as never,
-      archive_intros: Object.fromEntries(Object.entries(intros).map(([k, v]) => [k, { h1: v.h1, intro: v.intro, seo_text: v.seo_text, faq: v.faq.es }])),
+      archive_intros: Object.fromEntries(Object.entries(intros).map(([k, v]) => [k, { h1: v.h1, intro: v.intro, seo_text: v.seo_text, faq: v.faq.es, hero: media[ARCHIVE_HEROES[k]] ?? null }])),
     },
     overrideAccess: true,
     context: ctx,
@@ -69,7 +71,7 @@ async function seedSettings(payload: Payload) {
       booking_band: s.booking_band.en,
       stats: s.stats.en,
       trust_items: s.trust_items.en as never,
-      archive_intros: Object.fromEntries(Object.entries(EN_INTROS).map(([k, v]) => [k, v])),
+      archive_intros: Object.fromEntries(Object.entries(EN_INTROS).map(([k, v]) => [k, { ...v, hero: media[ARCHIVE_HEROES[k]] ?? null }])),
     },
     overrideAccess: true,
     context: ctx,
@@ -139,7 +141,7 @@ async function seedNavigation(payload: Payload) {
 const payload = await getPayload({ config })
 await seedTerms(payload)
 const media = await ensurePlaceholders(false)
-await seedSettings(payload)
+await seedSettings(payload, media)
 await createSamples(payload)
 await seedPages(payload, media)
 await seedNavigation(payload)

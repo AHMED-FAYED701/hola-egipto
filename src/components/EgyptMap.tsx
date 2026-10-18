@@ -41,7 +41,14 @@ export const REGION_KEYS: Record<string, MapRegion['key']> = {
   'desierto-occidental': 'western',
 }
 
-export function EgyptMap({ regions, title, className }: { regions: MapRegion[]; title: string; className?: string }) {
+export interface MapPoint {
+  label: string
+  lat: number
+  lng: number
+}
+
+export function EgyptMap({ regions = [], route = [], title, className }: { regions?: MapRegion[]; route?: MapPoint[]; title: string; className?: string }) {
+  const routePts = route.map((p) => P(p.lng, p.lat))
   return (
     <svg className={className} viewBox="-10 -10 508 424" role="img" aria-label={title} width="508" height="424">
       <rect x="-10" y="-10" width="508" height="424" fill="var(--he-teal-50)" rx="18" />
@@ -49,6 +56,18 @@ export function EgyptMap({ regions, title, className }: { regions: MapRegion[]; 
       <polyline points={NILE} fill="none" stroke="var(--he-nile-teal)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
       <polyline points={DELTA_W} fill="none" stroke="var(--he-nile-teal)" strokeWidth="3" strokeLinecap="round" />
       <polyline points={DELTA_E} fill="none" stroke="var(--he-nile-teal)" strokeWidth="3" strokeLinecap="round" />
+      {routePts.length > 1 ? <polyline points={routePts.join(' ')} fill="none" stroke="var(--he-terracotta)" strokeWidth="3" strokeDasharray="8 6" strokeLinecap="round" /> : null}
+      {route.map((p, i) => {
+        const [x, y] = routePts[i].split(',').map(Number)
+        return (
+          <g key={p.label + i}>
+            <circle cx={x} cy={y} r="8" fill="var(--he-terracotta)" stroke="var(--he-linen)" strokeWidth="2.5" />
+            <text x={x + 13} y={y + 5} fill="var(--he-deep-oasis)" fontFamily="var(--he-font-sans)" fontWeight="700" fontSize="15" paintOrder="stroke" stroke="var(--he-sand-100)" strokeWidth="4">
+              {i + 1}. {p.label}
+            </text>
+          </g>
+        )
+      })}
       {regions.map((r) => {
         const [x, y] = P(...POS[r.key]).split(',').map(Number)
         const w = Math.max(60, r.label.length * 8.4 + 24)

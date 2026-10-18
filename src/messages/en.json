@@ -112,7 +112,15 @@
     "day_sat": "Saturday",
     "day_sun": "Sunday",
     "staticMap": "Route map",
-    "bookExternal": "Book on the provider's website"
+    "bookExternal": "Book on the provider's website",
+    "fac_pool": "Pool",
+    "fac_sun_deck": "Sun deck",
+    "fac_restaurant": "Restaurant",
+    "fac_bar": "Bar",
+    "fac_air_conditioning": "Air conditioning",
+    "fac_wifi": "Wi-Fi",
+    "fac_spa": "Spa",
+    "fac_gym": "Gym"
   },
   "archive": {
     "results": "{n, plural, =0 {No results} one {# result} other {# results}}",
@@ -159,8 +167,18 @@
     "noTrips": "No published trips visit this place yet."
   },
   "months": {
-    "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr", "may": "May", "jun": "Jun",
-    "jul": "Jul", "aug": "Aug", "sep": "Sep", "oct": "Oct", "nov": "Nov", "dec": "Dec"
+    "jan": "Jan",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Apr",
+    "may": "May",
+    "jun": "Jun",
+    "jul": "Jul",
+    "aug": "Aug",
+    "sep": "Sep",
+    "oct": "Oct",
+    "nov": "Nov",
+    "dec": "Dec"
   },
   "guide": {
     "readingTime": "{n} min read",
@@ -198,5 +216,15 @@
     "reject": "Reject all",
     "policy": "Cookie policy",
     "manage": "Cookie settings"
+  },
+  "contact": {
+    "methods": "How to reach us",
+    "phone": "Phone",
+    "hours": "Reply hours",
+    "company": "Company",
+    "legalName": "Legal name",
+    "licence": "Tourism licence",
+    "formTitle": "Write to us",
+    "send": "Send message"
   }
 }

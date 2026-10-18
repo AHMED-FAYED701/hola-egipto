@@ -1,0 +1,108 @@
+.header {
+  padding-block: var(--he-space-5) var(--he-space-6);
+  max-width: 50rem;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--he-space-2) var(--he-space-5);
+  color: var(--he-sand-ink);
+  font-size: var(--he-text-small);
+  margin: 0;
+}
+.cover {
+  border-radius: var(--he-radius-md);
+  overflow: hidden;
+  margin-bottom: var(--he-space-7);
+}
+.cover img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: var(--he-space-8);
+  align-items: start;
+}
+@media (max-width: 1023px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+.toc {
+  position: sticky;
+  top: 6rem;
+  padding: var(--he-space-5);
+  background: var(--he-linen);
+  border-radius: var(--he-radius-md);
+}
+@media (max-width: 1023px) {
+  .toc {
+    position: static;
+  }
+}
+.toc h2 {
+  font: 600 var(--he-text-eyebrow) / 1.2 var(--he-font-sans);
+  text-transform: uppercase;
+  letter-spacing: var(--he-tracking-eyebrow);
+  color: var(--he-terracotta-ink);
+}
+.toc ol {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: var(--he-space-1);
+}
+.toc a {
+  display: inline-block;
+  padding: 0.35rem 0;
+  font-size: var(--he-text-small);
+}
+.tip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--he-space-4);
+  margin: var(--he-space-6) 0;
+  padding: var(--he-space-5);
+  background: var(--he-sand-100);
+  border-left: 4px solid var(--he-sun-sand);
+  border-radius: var(--he-radius-md);
+}
+.tip svg {
+  color: var(--he-sand-ink);
+}
+.tip strong {
+  display: block;
+  margin-bottom: var(--he-space-1);
+}
+.tip p {
+  margin: 0;
+}
+.tripCard {
+  margin: var(--he-space-6) 0;
+  max-width: 26rem;
+}
+.author {
+  display: flex;
+  gap: var(--he-space-4);
+  align-items: center;
+  margin-top: var(--he-space-8);
+  padding: var(--he-space-5);
+  background: var(--he-linen);
+  border-radius: var(--he-radius-md);
+}
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--he-radius-pill);
+  background: var(--he-deep-oasis) var(--he-pattern-deep);
+  background-size: 64px;
+  flex: none;
+}
+.author p {
+  margin: 0;
+  color: var(--he-stone);
+  font-size: var(--he-text-small);
+}

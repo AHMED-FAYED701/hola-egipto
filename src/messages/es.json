@@ -112,7 +112,15 @@
     "day_sat": "Sábado",
     "day_sun": "Domingo",
     "staticMap": "Mapa de la ruta",
-    "bookExternal": "Reservar en la web del proveedor"
+    "bookExternal": "Reservar en la web del proveedor",
+    "fac_pool": "Piscina",
+    "fac_sun_deck": "Cubierta solárium",
+    "fac_restaurant": "Restaurante",
+    "fac_bar": "Bar",
+    "fac_air_conditioning": "Aire acondicionado",
+    "fac_wifi": "Wifi",
+    "fac_spa": "Spa",
+    "fac_gym": "Gimnasio"
   },
   "archive": {
     "results": "{n, plural, =0 {No hay resultados} one {# resultado} other {# resultados}}",
@@ -159,8 +167,18 @@
     "noTrips": "Aún no hay viajes publicados que pasen por aquí."
   },
   "months": {
-    "jan": "Ene", "feb": "Feb", "mar": "Mar", "apr": "Abr", "may": "May", "jun": "Jun",
-    "jul": "Jul", "aug": "Ago", "sep": "Sep", "oct": "Oct", "nov": "Nov", "dec": "Dic"
+    "jan": "Ene",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Abr",
+    "may": "May",
+    "jun": "Jun",
+    "jul": "Jul",
+    "aug": "Ago",
+    "sep": "Sep",
+    "oct": "Oct",
+    "nov": "Nov",
+    "dec": "Dic"
   },
   "guide": {
     "readingTime": "{n} min de lectura",
@@ -198,5 +216,15 @@
     "reject": "Rechazar todo",
     "policy": "Política de cookies",
     "manage": "Configurar cookies"
+  },
+  "contact": {
+    "methods": "Cómo contactarnos",
+    "phone": "Teléfono",
+    "hours": "Horario de respuesta",
+    "company": "Empresa",
+    "legalName": "Razón social",
+    "licence": "Licencia de turismo",
+    "formTitle": "Escríbenos",
+    "send": "Enviar mensaje"
   }
 }

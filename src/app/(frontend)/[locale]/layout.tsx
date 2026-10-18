@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import { hasLocale } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import type { ReactNode } from 'react'
+import { preload } from 'react-dom'
 
 import { ConsentBanner } from '@/components/Consent'
 import { Tracking } from '@/components/Tracking'
@@ -34,14 +35,15 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   const t = await getTranslations({ locale, namespace: 'common' })
   const tc = await getTranslations({ locale, namespace: 'consent' })
   const gtm = settings.gtm_id?.trim()
+  // Exactly two font preloads (contracts §17); ReactDOM.preload emits each <link rel="preload"> once.
+  preload('/fonts/fraunces-latin-600-normal.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' })
+  preload('/fonts/plus-jakarta-sans-latin-400-normal.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' })
   return (
     <html lang={locale}>
       <head>
         {/* dataLayer + Consent Mode v2 defaults: first inline script in <head> (contracts §15) */}
         <script dangerouslySetInnerHTML={{ __html: DATALAYER_BOOTSTRAP }} />
         {gtm ? <script dangerouslySetInnerHTML={{ __html: gtmSnippet(gtm) }} /> : null}
-        <link rel="preload" href="/fonts/fraunces-latin-600-normal.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/plus-jakarta-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body>
         <a className="skip-link" href="#main">

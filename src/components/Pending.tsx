@@ -5,11 +5,11 @@ export function Pending({ locale }: { locale: 'es' | 'en' }) {
 
 /** Render text, wrapping any "[pendiente]" / "[pending]" token in the dashed marker. */
 export function WithPending({ text }: { text: string }) {
-  const parts = text.split(/(\[(?:pendiente|pending)\])/g)
+  const parts = text.split(/(\[[^\]]*(?:pendiente|pending)[^\]]*\])/gi)
   return (
     <>
       {parts.map((p, i) =>
-        /^\[(?:pendiente|pending)\]$/.test(p) ? (
+        /^\[[^\]]*(?:pendiente|pending)[^\]]*\]$/i.test(p) ? (
           <span key={i} className="pending">
             {p}
           </span>

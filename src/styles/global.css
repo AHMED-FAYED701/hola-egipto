@@ -478,3 +478,4 @@ fieldset {
 .breadcrumbs svg {
   color: var(--he-sand-ink);
 }
+.h4 { font-size: var(--he-text-h4); }
