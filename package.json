@@ -40,6 +40,7 @@
     "lucide-react": "1.59.0",
     "next": "16.4.2",
     "next-intl": "4.14.9",
+    "nodemailer": "^7.0.13",
     "payload": "3.91.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@types/node": "22.19.9",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "eslint": "^9.16.0",

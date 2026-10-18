@@ -1,0 +1,75 @@
+.form {
+  margin-top: var(--he-space-6);
+}
+.step {
+  margin-bottom: var(--he-space-7);
+}
+.step legend {
+  font: 600 var(--he-text-h3) / var(--he-leading-snug) var(--he-font-display);
+  margin-bottom: var(--he-space-5);
+}
+.stepNo {
+  display: block;
+  font: 600 var(--he-text-eyebrow) / 1.2 var(--he-font-sans);
+  text-transform: uppercase;
+  letter-spacing: var(--he-tracking-eyebrow);
+  color: var(--he-terracotta-ink);
+  margin-bottom: var(--he-space-2);
+}
+.enhanced .step[data-active='false'] {
+  display: none;
+}
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0 var(--he-space-5);
+}
+.checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0 var(--he-space-4);
+}
+.nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--he-space-3);
+  margin-top: var(--he-space-5);
+}
+.progress {
+  display: flex;
+  gap: var(--he-space-2);
+  margin-bottom: var(--he-space-5);
+  list-style: none;
+  padding: 0;
+}
+.progress li {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--he-radius-pill);
+  background: var(--he-line);
+}
+.progress li[data-done='true'] {
+  background: var(--he-nile-teal);
+}
+.summary {
+  margin-bottom: var(--he-space-6);
+  padding: var(--he-space-5);
+  border: 2px solid var(--he-error);
+  border-radius: var(--he-radius-md);
+  background: var(--he-linen);
+}
+.summary h2 {
+  font-size: var(--he-text-h4);
+  color: var(--he-error);
+}
+.summary ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

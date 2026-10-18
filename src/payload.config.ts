@@ -15,6 +15,7 @@ import { Pages } from './collections/Pages'
 import { CruiseTypes, Departures, Durations, GuideTopics, Regions, TripStyles } from './collections/taxonomies'
 import { Cruises, Excursions, Tours } from './collections/trips'
 import { Users } from './collections/Users'
+import { holaEmailAdapter } from './lib/email-adapter'
 import { Navigation } from './globals/Navigation'
 import { SiteSettings } from './globals/SiteSettings'
 
@@ -61,6 +62,7 @@ export default buildConfig({
   ],
   globals: [SiteSettings, Navigation],
   editor: lexicalEditor(),
+  email: holaEmailAdapter,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
