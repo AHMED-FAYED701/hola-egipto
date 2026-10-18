@@ -264,7 +264,10 @@ export const NAVIGATION: L<{ header: HeaderItem[]; footer_columns: Col[]; footer
             { label: 'Dahabiyas', href: '/en/nile-cruises/type/dahabiya/' },
             { label: 'Lake Nasser', href: '/en/nile-cruises/type/lake-nasser/' },
           ] },
-          { heading: 'Main routes', links: [] },
+          { heading: 'Main routes', links: [
+            { label: 'Luxor → Aswan, 4 nights', href: '/en/nile-cruises/nile-cruise-luxor-aswan-4-nights/' },
+            { label: 'Dahabiya, 5 nights', href: '/en/nile-cruises/nile-dahabiya-5-nights/' },
+          ] },
         ],
       },
       {
@@ -286,8 +289,15 @@ export const NAVIGATION: L<{ header: HeaderItem[]; footer_columns: Col[]; footer
       {
         label: 'Destinations', href: '/en/destinations/', panel_extra: 'map',
         columns: [
-          { heading: 'Cairo and Upper Egypt', links: [] },
+          { heading: 'Cairo and Upper Egypt', links: [
+            { label: 'Cairo and Giza', href: '/en/destinations/cairo-and-giza/' },
+            { label: 'Luxor', href: '/en/destinations/luxor/' },
+            { label: 'Aswan', href: '/en/destinations/aswan/' },
+            { label: 'Abu Simbel', href: '/en/destinations/abu-simbel/' },
+          ] },
           { heading: 'Red Sea and desert', links: [
+            { label: 'Hurghada', href: '/en/destinations/hurghada/' },
+            { label: 'Marsa Alam', href: '/en/destinations/marsa-alam/' },
             { label: 'Red Sea', href: '/en/destinations/region/red-sea/' },
             { label: 'Western Desert', href: '/en/destinations/region/western-desert/' },
           ] },
@@ -296,7 +306,10 @@ export const NAVIGATION: L<{ header: HeaderItem[]; footer_columns: Col[]; footer
       {
         label: 'Travel guide', href: '/en/travel-guide/', panel_extra: 'latest_guides',
         columns: [
-          { heading: 'Plan', links: [{ label: 'Planning', href: '/en/travel-guide/topic/planning/' }] },
+          { heading: 'Plan', links: [
+            { label: 'Planning', href: '/en/travel-guide/topic/planning/' },
+            { label: 'When to visit', href: '/en/travel-guide/when-to-visit-egypt/' },
+          ] },
           { heading: 'Explore', links: [
             { label: 'What to see', href: '/en/travel-guide/topic/what-to-see/' },
             { label: 'Culture & food', href: '/en/travel-guide/topic/culture-food/' },
@@ -318,6 +331,9 @@ export const NAVIGATION: L<{ header: HeaderItem[]; footer_columns: Col[]; footer
       { heading: 'Excursions and destinations', links: [
         { label: 'Excursions from Hurghada', href: '/en/excursions/from/hurghada/' },
         { label: 'Excursions from Marsa Alam', href: '/en/excursions/from/marsa-alam/' },
+        { label: 'Cairo and Giza', href: '/en/destinations/cairo-and-giza/' },
+        { label: 'Luxor', href: '/en/destinations/luxor/' },
+        { label: 'Aswan', href: '/en/destinations/aswan/' },
       ] },
       { heading: 'Hola Egipto', links: [
         { label: 'About us', href: '/en/about-us/' },

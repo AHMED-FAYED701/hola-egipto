@@ -63,3 +63,10 @@
 - Defaulted: `retention --dry-run` prints `{"deleted":0,"would_delete":n,"dry_run":true}`.
 - Verified on the empty database: health `{"db":true,"payload":true,"collections":15}`; samples count/dry-run, urls, inquiries, settings get, token, retention, test-session create (JWT) + delete (`{"deleted":1}`) all exit 0; revalidate 200 / 401.
 - DONE
+
+## 2026-10-18 — S6 · Launch data and sample content
+- `pnpm hola:seed` (idempotent): launch terms (contracts §4, slugs = ascii-lowercased names, fixed duration slugs) with draft landing copy (h1, intro, SEO text, FAQ) for every term that has items; 55 branded placeholder JPEGs (sharp, q82, deep/teal tile at 2×, papyrus label, localized alt) in `media` with `holaSample`; `site-settings` defaults (booking band on, stats strip, 3 true trust items, archive intros for all 5 collections ES/EN, 2 sample cancellation policies, default WhatsApp messages, `reply_hours` `[pendiente]`/`[pending]`); `hola:samples create`; the 10 fixed pages with templates and copy (home/about blocks, contact, FAQ 4×3, plan, thank-you, 4 legal pages with spec headings + `[Texto legal pendiente…]`, cookie list); `navigation` (5 mega items, 3 footer columns, legal links per language).
+- Sample set: tours 3/3, cruises 2/2, excursions 4/4, destinations 6/6, guides 3/3 (es/en), media 55 — `pnpm -s hola:samples count` matches content rules §2. Running `hola:seed` twice creates no duplicates (same ids/counts).
+- Bugs fixed: (1) the tours `beforeChange` hook passed `locale: 'es'` together with the shared `req`, which switched `req.locale` and wrote English saves into Spanish — the hook now restores `req.locale`; (2) a localized `required` field inside a shared array (`cabins.type`) blocked the English pass — made optional (migration `cabin_type_optional`). Partial sample data from the failed runs was removed with `hola:samples delete` before the final seed.
+- `hola:urls`: 104 rows (home 2, archive 10, single 36, term 34, page 18, search 2, 404 2); every row answers its expected status with the preview cookie.
+- DONE

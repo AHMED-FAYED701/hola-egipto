@@ -626,7 +626,7 @@ export interface Cruise {
     | null;
   cabins?:
     | {
-        type: string;
+        type?: string | null;
         size_m2?: number | null;
         beds?: string | null;
         price_from_eur?: number | null;

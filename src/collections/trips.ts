@@ -59,16 +59,24 @@ export function durationSlugForDays(days: number): string {
 const setDuration: CollectionBeforeChangeHook = async ({ data, req }) => {
   const days = Number(data?.duration_days)
   if (!days) return { ...data, duration: null }
-  const res = await req.payload.find({
-    collection: 'durations',
-    where: { slug: { equals: durationSlugForDays(days) } },
-    locale: 'es',
-    limit: 1,
-    depth: 0,
-    req,
-    overrideAccess: true,
-  })
-  return { ...data, duration: res.docs[0]?.id ?? null }
+  // Passing `locale` with the shared `req` would switch req.locale for the rest of this save.
+  const locale = req.locale
+  const fallbackLocale = req.fallbackLocale
+  try {
+    const res = await req.payload.find({
+      collection: 'durations',
+      where: { slug: { equals: durationSlugForDays(days) } },
+      locale: 'es',
+      limit: 1,
+      depth: 0,
+      req,
+      overrideAccess: true,
+    })
+    return { ...data, duration: res.docs[0]?.id ?? null }
+  } finally {
+    req.locale = locale
+    req.fallbackLocale = fallbackLocale
+  }
 }
 
 export const Tours = tripCollection(
@@ -129,7 +137,7 @@ export const Cruises = tripCollection(
       type: 'array',
       label: l('Camarotes', 'Cabins'),
       fields: [
-        { name: 'type', type: 'text', localized: true, required: true, label: l('Tipo', 'Type') },
+        { name: 'type', type: 'text', localized: true, label: l('Tipo', 'Type') },
         { name: 'size_m2', type: 'number', label: 'm²' },
         { name: 'beds', type: 'text', localized: true, label: l('Camas', 'Beds') },
         { name: 'price_from_eur', type: 'number', label: l('Desde (EUR)', 'From (EUR)') },

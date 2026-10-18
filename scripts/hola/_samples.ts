@@ -206,7 +206,7 @@ export async function createSamples(payload: Payload): Promise<void> {
       es.cabins = t.cabins.map((c) => ({ type: c.type.es, size_m2: c.size_m2, beds: c.beds.es, price_from_eur: c.price_from_eur, price_from_usd: c.price_from_usd }))
     }
     if (t.collection === 'excursions') es.start_times = t.start_times.map((s) => ({ time: s.time, label: s.label.es }))
-    const id = await upsert(payload, t.collection, t.slug.es, shared, { es, en: {} })
+    const id = await upsert(payload, t.collection, t.slug.es, shared, { es, en })
     const saved = (await payload.findByID({ collection: t.collection, id, locale: 'es', depth: 0, overrideAccess: true })) as unknown as AnyData
     if (t.collection === 'cruises') {
       const sd = (saved.start_dates as { id: string }[]) || []
@@ -218,7 +218,11 @@ export async function createSamples(payload: Payload): Promise<void> {
       const st = (saved.start_times as { id: string }[]) || []
       en.start_times = t.start_times.map((s, i) => ({ id: st[i]?.id, time: s.time, label: s.label.en }))
     }
-    await payload.update({ collection: t.collection, id, locale: 'en', data: en, overrideAccess: true, context: ctx })
+    if (t.collection !== 'tours') {
+      const rows: AnyData = {}
+      for (const k of ['start_dates', 'cabins', 'start_times']) if (en[k]) rows[k] = en[k]
+      await payload.update({ collection: t.collection, id, locale: 'en', data: rows, overrideAccess: true, context: ctx })
+    }
     trips[t.key] = id
     log(`${t.collection} ${t.slug.es}`)
   }
