@@ -54,3 +54,12 @@
 - `agentRules: false` in next.config (Next 16 dev writes AGENTS.md otherwise).
 - Verified on the production build with the preview cookie: `/` lang es, `/en/` lang en, every archive and search 200 in both languages, unknown paths 404 with the localized page, `/viajes-a-egipto` → 308, `/es/…` → 307 to the unprefixed URL. Single/term/fixed-page routes answer 404 until content exists; they are verified with data in S6/S8.
 - DONE
+
+## 2026-10-18 — S5 · CLI scripts
+- `scripts/hola/*.ts`, wired as `payload run scripts/hola/<name>.ts --`: `health`, `schema`, `seed`, `placeholders [--force]`, `samples create|delete [--dry-run]|count`, `urls`, `token`, `preview-url`, `test-session create|delete`, `settings get|set`, `inquiries count|last`, `retention [--dry-run]`. JSON/TSV on stdout only (Payload logger → stderr), exit 0, no prompts, no secrets (only `preview-url` prints the key, by contract).
+- `payload run` strips the script path from argv, so engines live in `_samples.ts` / `_placeholders.ts` and the CLI files are thin wrappers; `args()` treats every argument as a string.
+- `POST /api/hola/revalidate` (header `x-hola-revalidate`, body `{"all":true}`) → 200 `{"ok":true}`, wrong/missing key → 401; it also signals the proxy to refresh its slug index. Content-changing scripts call it at the end when the server answers.
+- Seed engine + launch data written now (terms with draft landing copy, settings defaults, navigation, fixed pages); sample content data files (`scripts/hola/data/{tours,cruises,excursions,destinations}.ts`, `data/guides/*.ts`) were drafted in parallel by writing subagents against `data/types.ts` and a shared brief (content rules §1–§3), then checked (types, lengths, forbidden phrases).
+- Defaulted: `retention --dry-run` prints `{"deleted":0,"would_delete":n,"dry_run":true}`.
+- Verified on the empty database: health `{"db":true,"payload":true,"collections":15}`; samples count/dry-run, urls, inquiries, settings get, token, retention, test-session create (JWT) + delete (`{"deleted":1}`) all exit 0; revalidate 200 / 401.
+- DONE

@@ -14,7 +14,18 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "typecheck": "tsc --noEmit",
     "migrate": "cross-env NODE_OPTIONS=--no-deprecation payload migrate",
-    "hola:schema": "payload run scripts/hola/schema.ts --"
+    "hola:schema": "payload run scripts/hola/schema.ts --",
+    "hola:health": "payload run scripts/hola/health.ts --",
+    "hola:seed": "payload run scripts/hola/seed.ts --",
+    "hola:placeholders": "payload run scripts/hola/placeholders.ts --",
+    "hola:samples": "payload run scripts/hola/samples.ts --",
+    "hola:urls": "payload run scripts/hola/urls.ts --",
+    "hola:token": "payload run scripts/hola/token.ts --",
+    "hola:preview-url": "payload run scripts/hola/preview-url.ts --",
+    "hola:test-session": "payload run scripts/hola/test-session.ts --",
+    "hola:settings": "payload run scripts/hola/settings.ts --",
+    "hola:inquiries": "payload run scripts/hola/inquiries.ts --",
+    "hola:retention": "payload run scripts/hola/retention.ts --"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.91.0",
