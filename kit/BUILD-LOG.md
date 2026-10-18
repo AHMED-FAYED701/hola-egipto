@@ -21,3 +21,13 @@
 - `scripts/serve.sh start|stop|restart` runs `pnpm start` in the background with output appended to `kit/logs/server.log`.
 - Verified: lint, typecheck, build pass; `pnpm start` → `/admin` 200, `/api/users` 403 without redirect.
 - DONE
+
+## 2026-10-18 — S2 · Coming-soon page, preview bypass, headers
+- `src/proxy.ts` (Node runtime): passes `/admin…`, `/api/…`, `/_next/…`, metadata files and any path whose last segment has a dot; `?hola_preview=<key>` → 307 without the parameter + `hola_preview` HMAC cookie (HttpOnly, Lax, 30 days, Secure only on HTTPS); wrong key → coming-soon; `payload-token` verified with jose against SHA-256(PAYLOAD_SECRET)[0:32]; front-end no-slash URLs → 308 to the slashed URL (query kept).
+- Coming-soon page: `GET /api/hola/coming-soon` route (proxy rewrites visitors to it) → 503 with `Retry-After: 86400`, `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store`; self-contained HTML, lang es, inline stacked colour logo, both languages, papyrus + pattern, brand fonts; WhatsApp button only when `whatsapp_number` is set.
+- Security headers (contracts §11) via `next.config` `headers()`, CSP in report-only.
+- Brand files copied per kit/brand/README.md: header/footer logos, stacked logo, simple mark, pattern tiles + dividers → `public/brand/`, OG PNGs → `public/brand/og/`, woff2 + OFL → `public/fonts/`, favicon.ico/icon.svg/apple-icon.png → `src/app/`, Android/maskable PNGs → `public/`; `manifest.ts`, `robots.ts`.
+- Helpers: `src/lib/secrets.ts` (preview HMAC, JWT key, inquiry token, ref, ip hash), `src/lib/whatsapp.ts`.
+- Fixed during the step: NextURL drops the trailing slash on stringify, so the 308 target is built with `new URL()`; the SVG's own `<title>` is stripped so the page has one title.
+- Verified on the production build: visitor `/` → 503 + 3 headers; `payload-token=garbage` → 503; wrong preview key → 503, no cookie; preview link → 307 + cookie, cookie passes the gate; `/admin` 200, `/api/users` 403, robots/favicon/icon/apple-icon/manifest/brand/fonts 200; `/en?x=1` → 308 `/en/?x=1`.
+- DONE
