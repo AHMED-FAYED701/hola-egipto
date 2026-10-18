@@ -1,0 +1,15 @@
+/goal Build the complete Hola Egipto website in this repository exactly as kit/START-HERE.md describes, following kit/docs/02-BUILD-PLAN.md from S0 to S13 in order, with one commit per step ("S<n>: <name>") and a kit/BUILD-LOG.md entry per step. Do not ask questions; when something is unclear, take the spec default, log it and continue.
+
+The goal is met only when all of the following have been shown in this conversation, in this order, after the final commit:
+1. The production build is running: `pnpm build` succeeded and `pnpm start` is serving http://localhost:3000 (output appended to kit/logs/server.log).
+2. The full output of `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt`, whose last line reads `ACCEPTANCE SUMMARY: pass=<n> fail=0 warn=<n> blocked=<n>`.
+3. kit/BUILD-REPORT.md is written from kit/docs/06-REPORT-TEMPLATE.md and committed, and its "Summary" and "Needs you" sections are printed.
+4. `git status --porcelain` prints nothing, and `git log --oneline | head -20` is printed.
+
+Constraints that must hold the whole way:
+- Never weaken, skip or delete a check in kit/bin/acceptance.py or kit/bin/acceptance.sh to make it pass; fix the app. A genuine script bug may be fixed only if it is listed under "Script changes" in the report.
+- Never print, cat, echo, copy or commit .env.local or any secret value, and never rewrite DATABASE_URI.
+- Work only inside this repository and its database; no sudo, no remote git, no deployment, no web image downloads, no permanent user accounts.
+- A failing acceptance check is not a reason to stop: fix it, commit, rebuild, restart and re-run.
+
+The goal is impossible only if Node, pnpm or the database in DATABASE_URI cannot be reached; in that case write kit/BUILD-REPORT.md saying exactly what is needed, print it, and stop.

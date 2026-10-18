@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 215.50 157.00" width="216" height="157" role="img" aria-label="Hola Egipto"><title>Hola Egipto</title><defs><mask id="msc-side" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="200">
+  <rect width="240" height="200" fill="#fff"/>
+  <path d="M120 50 L70 140 L172 140 Z" fill="#000" stroke="#000" stroke-width="8.0" stroke-linejoin="round"/>
+  <path d="M24 151 C55 140 83 141 110 149 S164 158 216 146" fill="none" stroke="#000" stroke-width="14.5" stroke-linecap="round"/>
+</mask>
+<mask id="msc-main" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="200">
+  <rect width="240" height="200" fill="#fff"/>
+  <path d="M24 151 C55 140 83 141 110 149 S164 158 216 146" fill="none" stroke="#000" stroke-width="14.5" stroke-linecap="round"/>
+</mask>
+<mask id="msc-sun" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="200">
+  <rect width="240" height="200" fill="#fff"/>
+  <path d="M120 50 L70 140 L133 140 Z M120 50 L133 140 L172 140 Z M64 96 L24 140 L75 140 Z M64 96 L75 140 L98 140 Z M177 100 L148 140 L187 140 Z M177 100 L187 140 L216 140 Z" fill="#000" stroke="#000" stroke-width="8.0" stroke-linejoin="round"/>
+</mask>
+<clipPath id="msc-ring"><path d="M46 112 A74 74 0 0 1 194 112 L180 112 A60 60 0 0 0 60 112 Z"/></clipPath></defs><g transform="translate(-12.25,-32.00)"><path mask="url(#msc-sun)" d="M46 112 A74 74 0 0 1 194 112 L180 112 A60 60 0 0 0 60 112 Z" fill="#E0B57C"/>
+<g mask="url(#msc-side)"><path d="M64 96 L24 140 L75 140 Z" fill="#5B939D"/><path d="M64 96 L75 140 L98 140 Z" fill="#2C6A77"/><path d="M177 100 L148 140 L187 140 Z" fill="#5B939D"/><path d="M177 100 L187 140 L216 140 Z" fill="#2C6A77"/></g>
+<g mask="url(#msc-main)"><path d="M120 50 L70 140 L133 140 Z" fill="#145B6B"/><path d="M120 50 L133 140 L172 140 Z" fill="#0C3B47"/></g>
+<path d="M24 151 C55 140 83 141 110 149 S164 158 216 146" fill="none" stroke="#145B6B" stroke-width="7.5" stroke-linecap="round"/>
+<path d="M48 165 C75 157 99 157 122 163 S168 169 194 160" fill="none" stroke="#145B6B" stroke-width="6.2" stroke-linecap="round"/>
+<path d="M78 178 C98 172 117 172 134 176 S156 180 166 177" fill="none" stroke="#145B6B" stroke-width="5.0" stroke-linecap="round"/></g></svg>

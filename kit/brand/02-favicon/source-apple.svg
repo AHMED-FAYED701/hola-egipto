@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"><rect width="64" height="64" rx="0" fill="#133232"/><g transform="translate(4.48,4.62) scale(0.86)"><mask id="fv-sun" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+<rect width="64" height="64" fill="#fff"/><path d="M32 15 L11 46 L53 46 Z" fill="#000" stroke="#000" stroke-width="5" stroke-linejoin="round"/></mask>
+<mask id="fv-pyr" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+<rect width="64" height="64" fill="#fff"/><path d="M7 53 C19 47 27 47.5 33 50.5 S46 55 57 49.5" stroke="#000" stroke-width="9.2" fill="none" stroke-linecap="round"/></mask>
+<path d="M10 41 A22 22 0 0 1 54 41 L48 41 A16 16 0 0 0 16 41 Z" fill="#E0B57C" mask="url(#fv-sun)"/>
+<g mask="url(#fv-pyr)"><path d="M32 15 L11 46 L37 46 Z" fill="#F7F1E6"/>
+<path d="M32 15 L37 46 L53 46 Z" fill="#9CC2C4"/></g><path d="M7 53 C19 47 27 47.5 33 50.5 S46 55 57 49.5" stroke="#F7F1E6" stroke-width="4.2" fill="none" stroke-linecap="round"/></g></svg>

@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.scaffold/
+.env*.local
+.env
+media/
+kit/reference/
+kit/logs/
+kit/reports/
+kit/backups/
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+npm-debug.log*
+.vscode/
