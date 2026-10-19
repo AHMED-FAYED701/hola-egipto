@@ -1,11 +1,8 @@
-import { cookies } from 'next/headers'
-
-import { SESSION_COOKIE, verifySession } from '@/lib/session'
+import { currentUser } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
-/** {"admin":true} for a logged-in admin/editor, so the front end can show owner-only "[pendiente]" markers. */
+/** {"admin":true} for a signed-in admin/editor, so the front end can show owner-only "[pendiente]" markers. */
 export async function GET() {
-  const claims = await verifySession((await cookies()).get(SESSION_COOKIE)?.value)
-  return Response.json({ admin: Boolean(claims) }, { headers: { 'Cache-Control': 'no-store' } })
+  return Response.json({ admin: Boolean(await currentUser()) }, { headers: { 'Cache-Control': 'no-store' } })
 }

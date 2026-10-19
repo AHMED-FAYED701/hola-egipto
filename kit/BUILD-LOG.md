@@ -211,3 +211,13 @@
 - Test inquiries removed afterwards (8 rows with `@hola.test` emails, via a temporary script deleted after use).
 - Gates: lint 0, typecheck 0, build 0 (no code change in this step).
 - DONE
+
+## 2026-10-19 — M7 · Auth and admin shell
+- `src/lib/session.ts` (HS256 `hola_session`, `sub`/`sv`/`exp` 7 days, APP_SECRET, jose) and `src/lib/auth.ts` (`currentUser()` re-checks user + `session_version` per request, `requireUser`/`requireAdmin`, `startSession`/`endSession` with `HttpOnly`, `SameSite=Lax`, `Path=/`, `Secure` when SITE_URL is https, `requestIpHash`, `safeNext`). Users/attempts data in `src/lib/content/users.ts` (bcryptjs cost 12, min 10 chars, `login_attempts` table: 5 failures per ip_hash or email in 15 min → generic refusal).
+- Admin routes `src/app/(admin)/admin/…` with their own root layout (no next-intl, brand tokens, `admin.css`), `/admin/login`, `/admin/setup?key=` (404 unless 0 users and the key equals HOLA_PREVIEW_KEY; creates an `admin` and signs in), signed-in area `(panel)` with nav, ES/EN UI toggle (cookie `hola_admin_lang`), logout, dashboard (counts per entity and language, samples, inquiries, images, newest inquiries). Server actions in `src/admin/actions.ts`. No `loading.tsx`/Suspense in `(admin)`.
+- Interceptor: `/admin…` except `/admin/login` and `/admin/setup` without a valid (signature/expiry) `hola_session` → `307 /admin/login?next=<path>`. Interceptor redirects now use `SITE_URL` (Next rejects a relative Location from the interceptor — tried first, it answered 500 "Invalid URL"; fixed before commit), never the request host (§19). `/api/hola/me` uses `currentUser()`.
+- `hola:test-session` on the new users table (M4).
+- Proof (production build): visitor `/admin` → 307 `/admin/login?next=%2Fadmin` → 200; `hola_session=garbage` on `/admin/inquiries` → 307 to login; test-session token → `/admin` 200 with the dashboard (`<h1>Panel</h1>`), `/en/` 200; after `test-session delete` the same token → redirect to login (user re-check). `/admin/setup` without/with a wrong key → 404. `/api/users`, `/api/inquiries`, `/api/tours`, `/api/graphql`, `/api/users/me` → 404.
+- Browser check (Playwright 1.64 from the scratchpad driving the system Chrome; no browser downloaded): a temporary `m7-login@hola.test` admin — 5 wrong passwords then the right one → all refused with the generic error (rate limit); after clearing those attempts, login → dashboard, cookie HttpOnly/Lax/Path=/ 7 days; UI toggle → English (`<html lang="en">`); logout → login page; `/admin` again → login. Screenshots at 1280 and 375 px look right; no console errors. Temporary user and attempts deleted.
+- Gates: lint 0, typecheck 0, build 0.
+- DONE

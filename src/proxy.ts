@@ -6,6 +6,7 @@ import { existsIn, matchPath, type RouteIndex } from './lib/route-match'
 
 import { flag, previewCookieValue, safeEqual } from './lib/secrets'
 import { SESSION_COOKIE, verifySession } from './lib/session'
+import { siteUrl } from './lib/site'
 
 const PASS_FILES = new Set([
   '/favicon.ico',
@@ -84,6 +85,23 @@ async function notFoundResponse(req: NextRequest): Promise<NextResponse | null> 
   return NextResponse.rewrite(url, { status: 404 })
 }
 
+/**
+ * Redirect to a path on SITE_URL: behind Hostinger's proxy the request host is not the public one (§19),
+ * and the interceptor must answer with an absolute Location.
+ */
+function redirectTo(path: string, status: 307 | 308) {
+  return NextResponse.redirect(siteUrl() + path, status)
+}
+
+const ADMIN_PUBLIC = /^\/admin\/(login|setup)\/?$/
+
+/** /admin… needs a valid `hola_session` (signature + expiry); pages re-check the user (contracts §18). */
+async function adminGate(req: NextRequest): Promise<NextResponse> {
+  const { pathname, search } = req.nextUrl
+  if (ADMIN_PUBLIC.test(pathname) || (await hasAdminSession(req))) return NextResponse.next()
+  return redirectTo(`/admin/login?next=${encodeURIComponent(pathname + search)}`, 307)
+}
+
 function comingSoon(req: NextRequest) {
   const url = req.nextUrl.clone()
   url.pathname = '/api/hola/coming-soon'
@@ -93,6 +111,8 @@ function comingSoon(req: NextRequest) {
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
+
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return adminGate(req)
 
   if (isBackendPath(pathname) || PASS_FILES.has(pathname) || isFilePath(pathname)) {
     return NextResponse.next()
@@ -105,15 +125,16 @@ export async function proxy(req: NextRequest) {
   if (previewParam !== null) {
     const key = process.env.HOLA_PREVIEW_KEY || ''
     if (key && safeEqual(previewParam, key)) {
-      const target = req.nextUrl.clone()
-      target.searchParams.delete(PREVIEW_PARAM)
-      const res = NextResponse.redirect(target, 307)
+      const params = new URLSearchParams(req.nextUrl.search)
+      params.delete(PREVIEW_PARAM)
+      const q = params.toString()
+      const res = redirectTo(pathname + (q ? `?${q}` : ''), 307)
       res.cookies.set(PREVIEW_COOKIE, previewCookieValue(), {
         path: '/',
         httpOnly: true,
         sameSite: 'lax',
         maxAge: 2592000,
-        secure: req.nextUrl.protocol === 'https:',
+        secure: siteUrl().startsWith('https'),
       })
       return res
     }
@@ -126,9 +147,7 @@ export async function proxy(req: NextRequest) {
 
   // Every public URL ends with "/" (contracts §5).
   if (!pathname.endsWith('/')) {
-    // Built by hand: NextURL drops the trailing slash when stringified.
-    const target = new URL(pathname + '/' + req.nextUrl.search, req.url)
-    return NextResponse.redirect(target, 308)
+    return redirectTo(pathname + '/' + req.nextUrl.search, 308)
   }
 
   // "/es/…" is redirected to the unprefixed URL by next-intl before it is checked.
