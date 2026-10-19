@@ -68,5 +68,6 @@
       "unrs-resolver"
     ]
   },
-  "private": true
+  "private": true,
+  "packageManager": "pnpm@12.14.0"
 }

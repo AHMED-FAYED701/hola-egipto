@@ -1,10 +1,10 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(__filename)
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
@@ -31,7 +31,16 @@ const securityHeaders = [
   { key: 'Content-Security-Policy-Report-Only', value: csp },
 ]
 
+/**
+ * A plain object (contracts §19): Hostinger builds with `output: 'standalone'`; the SQL migrations are
+ * traced into that output so the startup migration (src/instrumentation.ts) can find drizzle/.
+ */
 const nextConfig: NextConfig = {
+  output: 'standalone',
+  outputFileTracingIncludes: { '/**/*': ['./drizzle/**/*'] },
+  experimental: {
+    serverActions: { allowedOrigins: ['hola-egipto.com', 'www.hola-egipto.com'] },
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },
