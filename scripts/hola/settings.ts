@@ -1,36 +1,24 @@
-import config from '@payload-config'
-import { getPayload } from 'payload'
+/** `pnpm -s hola:settings get <field>` / `set <field> [value]`: shared site-settings fields (contracts §9). */
+import { getSharedSetting, saveSettingsShared, SHARED_SETTING_FIELDS, type SharedSettingField } from '../../src/lib/content/globals'
+import { args, log, main, out, revalidateSite } from './_cli'
 
-import { args, done, log, out, revalidateSite } from './_lib'
-
-// Shared (not localized) site-settings fields (contracts §4).
-const SHARED = ['whatsapp_number', 'contact_email', 'phone', 'address', 'legal_name', 'licence_number', 'gtm_id']
-
-const [cmd, field, ...rest] = args()
-if (!SHARED.includes(field || '')) {
-  log(`usage: hola:settings get|set <${SHARED.join('|')}> [value]`)
-  done(2)
-}
-const payload = await getPayload({ config })
-
-if (cmd === 'get') {
-  const doc = (await payload.findGlobal({ slug: 'site-settings', depth: 0, overrideAccess: true })) as unknown as Record<string, unknown>
-  const v = doc[field]
-  out(JSON.stringify(v === null || v === undefined ? '' : v))
-  done()
-} else if (cmd === 'set') {
-  const raw = rest.join(' ')
-  const value = raw === "''" || raw === '""' ? '' : raw
-  await payload.updateGlobal({
-    slug: 'site-settings',
-    data: { [field]: value === '' ? null : value },
-    overrideAccess: true,
-    context: { disableRevalidate: true },
-  })
-  await revalidateSite()
-  out({ ok: true })
-  done()
-} else {
-  log('usage: hola:settings get|set <field> [value]')
-  done(2)
-}
+const [cmd, field, ...value] = args()
+await main(async () => {
+  if (!(SHARED_SETTING_FIELDS as readonly string[]).includes(field || '')) {
+    log(`usage: hola:settings get|set <${SHARED_SETTING_FIELDS.join('|')}> [value]`)
+    throw Object.assign(new Error('usage'), { code: 'USAGE' })
+  }
+  const f = field as SharedSettingField
+  if (cmd === 'get') out(JSON.stringify(await getSharedSetting(f)))
+  else if (cmd === 'set') {
+    let v = value.join(' ').trim()
+    if (v === "''" || v === '""') v = ''
+    if (f === 'whatsapp_number') v = v.replace(/\D/g, '')
+    await saveSettingsShared({ [f]: v || null })
+    await revalidateSite()
+    out({ ok: true, field: f, set: Boolean(v) })
+  } else {
+    log('usage: hola:settings get|set <field> [value]')
+    throw Object.assign(new Error('usage'), { code: 'USAGE' })
+  }
+})

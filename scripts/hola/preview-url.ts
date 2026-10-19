@@ -1,6 +1,4 @@
-import { done, out } from './_lib'
+/** `pnpm -s hola:preview-url`: `<SITE_URL>/?hola_preview=<HOLA_PREVIEW_KEY>` (contracts §9). */
+import { out, siteUrl } from './_cli'
 
-// The only command that prints the preview key (contracts §9).
-const base = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/+$/, '')
-out(`${base}/?hola_preview=${encodeURIComponent(process.env.HOLA_PREVIEW_KEY || '')}`)
-done()
+out(`${siteUrl()}/?hola_preview=${encodeURIComponent(process.env.HOLA_PREVIEW_KEY || '')}`)

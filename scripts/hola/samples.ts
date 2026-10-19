@@ -1,27 +1,25 @@
-import config from '@payload-config'
-import { getPayload } from 'payload'
+/** `pnpm -s hola:samples create | delete [--dry-run] | count` (contracts §9, content rules §2). */
+import { args, log, main, out, revalidateSite } from './_cli'
+import { countSamples, createSamples, deleteSamples, seedImages } from './_seed'
 
-import { args, done, log, out, revalidateSite } from './_lib'
-import { countSamples, createSamples, deleteSamples } from './_samples'
-
-const [cmd] = args()
-const dry = args().includes('--dry-run')
-const payload = await getPayload({ config })
-if (cmd === 'create') {
-  await createSamples(payload)
-  await revalidateSite()
-  out(await countSamples(payload))
-} else if (cmd === 'delete') {
-  const counts = await deleteSamples(payload, dry)
-  if (dry) out({ would_delete: counts })
-  else {
+const [cmd, ...rest] = args()
+await main(async () => {
+  if (cmd === 'create') {
+    await createSamples(await seedImages())
     await revalidateSite()
-    out({ deleted: counts })
+    out({ ok: true, samples: await countSamples() })
+  } else if (cmd === 'delete') {
+    const dry = rest.includes('--dry-run')
+    const counts = await deleteSamples(dry)
+    if (dry) out({ would_delete: counts })
+    else {
+      await revalidateSite()
+      out({ deleted: counts })
+    }
+  } else if (cmd === 'count') {
+    out(await countSamples())
+  } else {
+    log('usage: hola:samples create | delete [--dry-run] | count')
+    throw Object.assign(new Error('usage'), { code: 'USAGE' })
   }
-} else if (cmd === 'count') {
-  out(await countSamples(payload))
-} else {
-  log('usage: hola:samples create | delete [--dry-run] | count')
-  done(2)
-}
-done()
+})

@@ -228,7 +228,8 @@ export const PAGES: PageSeed[] = [
           { ul: [
             'hola_consent — guarda tu elección de cookies (necesaria, 12 meses).',
             'hola_preview — acceso de revisión al sitio antes del lanzamiento (necesaria, 30 días).',
-            'payload-token — sesión del panel de administración, solo para el equipo (necesaria, sesión).',
+            'hola_session — sesión del panel de administración, solo para el equipo (necesaria, 7 días).',
+            'hola_admin_lang — idioma del panel de administración, solo para el equipo (necesaria, 12 meses).',
           ] },
           { p: 'Las cookies de analítica y publicidad solo se activan si las aceptas en el aviso de cookies. [pendiente]' },
         ],
@@ -237,7 +238,8 @@ export const PAGES: PageSeed[] = [
           { ul: [
             'hola_consent — stores your cookie choice (necessary, 12 months).',
             'hola_preview — review access to the site before launch (necessary, 30 days).',
-            'payload-token — admin panel session, team only (necessary, session).',
+            'hola_session — admin panel session, team only (necessary, 7 days).',
+            'hola_admin_lang — admin panel language, team only (necessary, 12 months).',
           ] },
           { p: 'Analytics and advertising cookies are only set if you accept them in the cookie notice. [pending]' },
         ],

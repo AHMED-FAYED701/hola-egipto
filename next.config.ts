@@ -1,4 +1,3 @@
-import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 import path from 'path'
@@ -45,20 +44,12 @@ const nextConfig: NextConfig = {
   // Do not write AGENTS.md into the repository during `next dev`.
   agentRules: false,
   images: {
-    localPatterns: [{ pathname: '/api/media/file/**' }, { pathname: '/brand/**' }],
+    localPatterns: [{ pathname: '/images/**' }, { pathname: '/brand/**' }],
     formats: ['image/webp'],
-  },
-  webpack: (webpackConfig) => {
-    webpackConfig.resolve.extensionAlias = {
-      '.cjs': ['.cts', '.cjs'],
-      '.js': ['.ts', '.tsx', '.js', '.jsx'],
-      '.mjs': ['.mts', '.mjs'],
-    }
-    return webpackConfig
   },
   turbopack: {
     root: path.resolve(dirname),
   },
 }
 
-export default withPayload(withNextIntl(nextConfig), { devBundleServerPackages: false })
+export default withNextIntl(nextConfig)

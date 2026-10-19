@@ -26,3 +26,5 @@ export function readingMinutes(text: string): number {
   const words = text.trim().split(/\s+/).filter(Boolean).length
   return Math.max(1, Math.round(words / 220))
 }
+
+export const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const

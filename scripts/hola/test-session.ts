@@ -1,34 +1,23 @@
+/**
+ * `pnpm -s hola:test-session create | delete` (contracts §9): a temporary admin `acceptance-<random>@hola.test`
+ * with a random password, printed as {"token":"<hola_session JWT>","id":n}; `delete` removes every @hola.test user.
+ */
 import { randomBytes } from 'node:crypto'
 
-import config from '@payload-config'
-import { getPayload } from 'payload'
-
-import { args, done, log, out } from './_lib'
+import { createUser, deleteTestUsers, getUser } from '../../src/lib/content/users'
+import { signSession } from '../../src/lib/session'
+import { args, log, main, out } from './_cli'
 
 const [cmd] = args()
-const payload = await getPayload({ config })
-
-if (cmd === 'create') {
-  const email = `acceptance-${randomBytes(6).toString('hex')}@hola.test`
-  const password = randomBytes(24).toString('hex')
-  const user = await payload.create({
-    collection: 'users',
-    data: { email, password, role: 'admin' },
-    overrideAccess: true,
-  })
-  const res = await payload.login({ collection: 'users', data: { email, password }, overrideAccess: true })
-  out({ token: res.token, id: user.id })
-  done()
-} else if (cmd === 'delete') {
-  const res = await payload.delete({
-    collection: 'users',
-    where: { email: { like: '@hola.test' } },
-    overrideAccess: true,
-  })
-  const deleted = res.docs.filter((d) => String(d.email).endsWith('@hola.test')).length
-  out({ deleted })
-  done()
-} else {
-  log('usage: hola:test-session create|delete')
-  done(2)
-}
+await main(async () => {
+  if (cmd === 'create') {
+    const id = await createUser(`acceptance-${randomBytes(6).toString('hex')}@hola.test`, randomBytes(24).toString('base64url'), 'admin')
+    const user = await getUser(id)
+    out({ token: await signSession(id, user?.session_version ?? 1), id })
+  } else if (cmd === 'delete') {
+    out({ deleted: await deleteTestUsers() })
+  } else {
+    log('usage: hola:test-session create | delete')
+    throw Object.assign(new Error('usage'), { code: 'USAGE' })
+  }
+})

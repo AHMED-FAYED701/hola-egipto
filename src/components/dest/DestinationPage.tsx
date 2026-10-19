@@ -1,11 +1,10 @@
 import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 
-import { MONTHS } from '@/collections/Destinations'
 import type { Destination, Region } from '@/lib/content/types'
 import type { Locale } from '@/i18n/routing'
 import { getSettings, listAvailable } from '@/lib/content/read'
-import { formatMonthYear } from '@/lib/format'
+import { formatMonthYear, MONTHS } from '@/lib/format'
 import { img } from '@/lib/media'
 import { tripCard, type TripDoc } from '@/lib/trips'
 import { absolute, archiveUrl, docUrl, homeUrl, termUrl, type TripCollection } from '@/lib/urls'
