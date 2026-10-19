@@ -66,5 +66,5 @@ export async function requestIpHash(): Promise<string> {
 /** Only same-site relative admin paths are allowed as a post-login destination. */
 export function safeNext(next: unknown): string {
   const n = typeof next === 'string' ? next : ''
-  return /^\/admin(\/[A-Za-z0-9/_?=&.-]*)?$/.test(n) && !n.startsWith('/admin/login') ? n : '/admin'
+  return /^\/admin(\/[A-Za-z0-9/_?=&.%-]*)?$/.test(n) && !n.startsWith('/admin/login') ? n : '/admin'
 }

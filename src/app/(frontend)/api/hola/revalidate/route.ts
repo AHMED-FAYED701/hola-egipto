@@ -1,5 +1,6 @@
 import { revalidatePath } from 'next/cache'
 
+import { revalidateSite } from '@/lib/revalidate'
 import { safeEqual } from '@/lib/secrets'
 
 export const dynamic = 'force-dynamic'
@@ -20,9 +21,7 @@ export async function POST(req: Request) {
   if (Array.isArray(body.paths) && !body.all) {
     for (const p of body.paths) if (typeof p === 'string' && p.startsWith('/')) revalidatePath(p)
   } else {
-    revalidatePath('/', 'layout')
+    revalidateSite()
   }
-  // Tell the proxy to refresh its slug index on the next request.
-  ;(globalThis as { __holaRoutesStamp?: number }).__holaRoutesStamp = Date.now()
   return Response.json({ ok: true }, { headers: { 'Cache-Control': 'no-store' } })
 }

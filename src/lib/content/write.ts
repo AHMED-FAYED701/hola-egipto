@@ -103,10 +103,23 @@ async function replaceJoins(ent: Ent, id: number, joins: Joins): Promise<void> {
   }
 }
 
+/** NOT NULL text columns keep '' (an item can exist in a language before it has a title). */
+const KEEP_EMPTY = new Set(['title', 'name'])
+
 /** Empty strings become NULL for nullable text columns (slugs stay unique only among real values). */
 function clean(row: Row): Row {
   const out: Row = {}
-  for (const [k, v] of Object.entries(row)) out[k] = v === '' ? null : v
+  for (const [k, v] of Object.entries(row)) out[k] = v === '' && !KEEP_EMPTY.has(k) ? null : v
+  return out
+}
+
+/** NULL for a NOT NULL column with a default (e.g. an empty select) means "use the default". */
+function withDefaults(table: Row, row: Row): Row {
+  const out: Row = { ...row }
+  for (const [k, v] of Object.entries(out)) {
+    const col = table[k] as { notNull?: boolean; hasDefault?: boolean; default?: unknown } | undefined
+    if (v === null && col?.notNull && col.hasDefault && typeof col.default !== 'object') out[k] = col.default
+  }
   return out
 }
 
@@ -115,7 +128,7 @@ export async function saveDoc(ent: Ent, doc: Editable): Promise<number> {
   const { main, i18n } = TABLES[ent]
   const db = getDb()
   const now = new Date()
-  const mainRow: Row = clean({ ...doc.main })
+  const mainRow: Row = withDefaults(main, clean({ ...doc.main }))
   delete mainRow.id
   delete mainRow.created_at
   if (ent === 'tours' && 'duration_days' in mainRow) mainRow.duration_id = await durationIdForDays(Number(mainRow.duration_days))
@@ -134,7 +147,7 @@ export async function saveDoc(ent: Ent, doc: Editable): Promise<number> {
 
   for (const [locale, row] of Object.entries(doc.i18n) as [Locale, Row][]) {
     if (!row) continue
-    const values = clean({ ...row })
+    const values = withDefaults(i18n, clean({ ...row }))
     delete values.id
     delete values.entity_id
     delete values.locale

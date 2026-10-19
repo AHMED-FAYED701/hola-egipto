@@ -54,6 +54,7 @@ body.adm {
   min-height: 100vh;
 }
 .adm-side {
+  min-width: 0;
   background: var(--he-deep-oasis);
   color: var(--he-papyrus);
   padding: var(--he-space-5) var(--he-space-4);
@@ -115,8 +116,18 @@ body.adm {
   }
   .adm-side ul {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     gap: var(--he-space-1);
+  }
+  .adm-side a {
+    white-space: nowrap;
+  }
+  .adm-logo img {
+    width: 110px;
+  }
+  .adm-logo {
+    margin-bottom: var(--he-space-2);
   }
   .adm-side h2 {
     margin: var(--he-space-3) 0 var(--he-space-1);
@@ -338,6 +349,7 @@ body.adm {
 }
 .adm-row input {
   flex: 1 1 12rem;
+  min-width: 0;
 }
 .adm-row button:not(.adm-btn),
 .adm-item__tools button,

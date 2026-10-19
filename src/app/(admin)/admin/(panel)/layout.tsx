@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 
 import { logoutAction, setAdminLangAction } from '@/admin/actions'
 import { AdminNav } from '@/admin/AdminNav'
+import { LangToggle } from '@/admin/LangToggle'
 import { adminDict } from '@/admin/server'
 import { requireUser } from '@/lib/auth'
 
@@ -32,13 +33,7 @@ export default async function PanelLayout({ children }: { children: ReactNode })
             <a href="/" target="_blank" rel="noopener">
               hola-egipto ↗
             </a>
-            <form action={setAdminLangAction}>
-              <input type="hidden" name="lang" value={other} />
-              <input type="hidden" name="back" value="/admin" />
-              <button type="submit" className="adm-btn adm-btn--small" lang={other}>
-                {other === 'en' ? 'English' : 'Español'}
-              </button>
-            </form>
+            <LangToggle action={setAdminLangAction} other={other} />
             <form action={logoutAction}>
               <button type="submit" className="adm-btn adm-btn--small">
                 {t.logout}
