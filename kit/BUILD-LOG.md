@@ -134,3 +134,23 @@
 - `kit/BUILD-REPORT.md` written from `kit/docs/06-REPORT-TEMPLATE.md` (summary, how to review, environment, status by spec section, needs you + deployment items, draft copy, deviations with commit hashes, manual checks, acceptance table, script changes: none, rollback, next runs). No script changes.
 - Final sequence after this commit: `pnpm build`, `pnpm start` (appended to `kit/logs/server.log`), `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt`.
 - DONE
+
+---
+
+# v3 run — Payload/Postgres → Drizzle/MySQL + custom admin (Hostinger)
+
+## 2026-10-19 — M0 · Preflight and baseline
+- Git tree clean at start; tag `v2-payload` created on `ca4fc74` (Kit v3 commit, last v2 code).
+- Versions: node v24.22.0, pnpm 12.14.0, MariaDB client 11.8.6 (`mariadb from 11.8.6-MariaDB`).
+- `.env.local` has `DATABASE_URL` (1 line, value not printed). One-off `mysql2` connection (mysql2 installed in the session scratchpad, not the repo): `SELECT VERSION()` = `11.8.6-MariaDB-5ubuntu0.1 from Ubuntu`, database charset `utf8mb4` / `utf8mb4_unicode_ci`, 0 tables.
+- Baseline: the v2 production server (`pnpm start`, left running by the v2 run) answered on :3000. Saved `pnpm -s hola:urls` → `kit/logs/v2-urls.tsv` (104 rows: home 2, archive 10, single 36, term 34, page 18, search 2, 404 2) and the HTML of **all 104 URLs** (a superset of the 6 required) plus robots/sitemap/filtered archive → `kit/logs/v2-pages/`; every URL answered its expected status.
+- Stopped the v2 server, then `bash kit/bin/acceptance.sh --preflight` reached its summary: `ACCEPTANCE SUMMARY: pass=49 fail=42 warn=1 blocked=9` (failures expected before the migration).
+- No commit for M0 (tag only).
+- DONE
+
+## 2026-10-19 — M1 · Environment and dependencies
+- `.env.local` (no values printed, each guarded by `grep -q`): added `APP_SECRET` (copied from `PAYLOAD_SECRET` via sed), `SITE_URL` (copied from `NEXT_PUBLIC_SITE_URL`; it is `http://localhost:3000`), `HOLA_AUTO_MIGRATE=0`. `HOLA_PREVIEW_KEY` and `N8N_WEBHOOK_URL` already existed. Old keys stay until M4.
+- `.env.example` rewritten from contracts §2 (every name, empty values, short comments).
+- Added `drizzle-orm` 0.45.4, `mysql2` 3.24.6, `bcryptjs` 3.0.3, `jose` 6.2.12 (already present), `zod` 4.6.7, `nodemailer` 7 (already present), `marked` 18.1.1, `sanitize-html` 2.18.1; dev: `drizzle-kit` 0.31.11, `@types/sanitize-html`, `@types/bcryptjs` (`tsx` 4.23.15 already a devDependency). `sharp` 0.35.4 moved to devDependencies. Payload stays until M4.
+- Gates: `pnpm lint` 0, `pnpm typecheck` 0, `pnpm build` 0 (v2 site, still on Postgres; ~12 min compile).
+- DONE
