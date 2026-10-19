@@ -154,3 +154,16 @@
 - Added `drizzle-orm` 0.45.4, `mysql2` 3.24.6, `bcryptjs` 3.0.3, `jose` 6.2.12 (already present), `zod` 4.6.7, `nodemailer` 7 (already present), `marked` 18.1.1, `sanitize-html` 2.18.1; dev: `drizzle-kit` 0.31.11, `@types/sanitize-html`, `@types/bcryptjs` (`tsx` 4.23.15 already a devDependency). `sharp` 0.35.4 moved to devDependencies. Payload stays until M4.
 - Gates: `pnpm lint` 0, `pnpm typecheck` 0, `pnpm build` 0 (v2 site, still on Postgres; ~12 min compile).
 - DONE
+
+## 2026-10-19 — M2 · Schema and migrations
+- `src/db/schema.ts`: Drizzle `mysql-core` schema for every entity (main + `_i18n` with `entity_id`/`locale`/`available`, unique (`entity_id`,`locale`) and (`locale`,`slug`)), the six taxonomies, join tables (`trip_destinations`, `related_trips`, `trip_trip_styles`, `excursion_departures`, `tour_guides`, `guide_guide_topics`, `guide_destinations`, `destination_nearby`, all with `position`), `images`, `site_settings(+_i18n)`, `navigation(+_i18n)`, `inquiries`, `users`, `login_attempts`. Lists use the one `jsonText<T>()` custom type (longtext). Timestamps `datetime` (pool `timezone: 'Z'` → UTC), dates `date` strings.
+- Defaults taken (logged): `last_reviewed` (trips) and `last_updated` (guides, pages) are shared dates on the main table (contracts §4 "dates are shared"; v2 had them localized). Cruise `cabins`/`start_dates` and excursion `start_times` live in the `_i18n` table (each language keeps its own list, because their notes/labels are words). Text lists (highlights, includes…) are stored as plain `string[]`. Pages get a localized `sections` jsonText (About page blocks: story, team, steps, licence) — an added name; the home sections are fixed in code with their texts in `site_settings_i18n.home` (contracts §4).
+- `src/db/client.ts`: one lazily created `mysql2/promise` pool (connectionLimit 5, utf8mb4, UTC), cached on `globalThis`, Drizzle on top; importing it opens no connection.
+- `drizzle.config.ts` (dialect mysql, out `drizzle/`, migrations table `__drizzle_migrations`). `pnpm db:generate` → `drizzle/0000_brave_sumo.sql`: no `json` columns, no CHECK, no TEXT defaults; longest constraint name 52 chars.
+- `src/db/migrate.ts` (contracts §19 procedure: dedicated connection, `GET_LOCK('hola_migrate',30)`, count before/after, `migrate()`, `RELEASE_LOCK`, `end()`), used by `scripts/hola/migrate.ts` (`pnpm migrate`) and `src/instrumentation.ts` (only nodejs runtime, not during build, only `HOLA_AUTO_MIGRATE=1`; logs, never throws).
+- `scripts/hola/run.mjs`: `node --env-file=<.env.local | .env.hostinger.local with --env=hostinger> --import tsx scripts/hola/<name>.ts …args`.
+- `src/db/model.ts` (logical name → table/column/join map) + `hola:schema` (verified against `information_schema.COLUMNS`, exit 1 on missing) + `hola:health`.
+- Proof: `pnpm -s migrate` → `{"applied":1}` on the empty database (41 tables), second run `{"applied":0}`; `pnpm -s hola:health` → `{"db":true,"version":"11.8.6-MariaDB-5ubuntu0.1 from Ubuntu","tables":41}`; `pnpm -s hola:schema` exits 0 and the acceptance A3 function run alone gives 17/17 PASS.
+- Note: pnpm 12 echoes `$ <command>` on stdout even with `-s`; the acceptance script tolerates leading noise (it parses the last JSON line).
+- Gates: lint 0, typecheck 0, build 0 (still the v2 front end).
+- DONE

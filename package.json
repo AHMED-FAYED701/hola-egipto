@@ -13,9 +13,9 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "typecheck": "tsc --noEmit",
-    "migrate": "cross-env NODE_OPTIONS=--no-deprecation payload migrate",
-    "hola:schema": "payload run scripts/hola/schema.ts --",
-    "hola:health": "payload run scripts/hola/health.ts --",
+    "migrate": "node scripts/hola/run.mjs migrate",
+    "hola:schema": "node scripts/hola/run.mjs schema",
+    "hola:health": "node scripts/hola/run.mjs health",
     "hola:seed": "payload run scripts/hola/seed.ts --",
     "hola:placeholders": "payload run scripts/hola/placeholders.ts --",
     "hola:samples": "payload run scripts/hola/samples.ts --",
@@ -25,7 +25,8 @@
     "hola:test-session": "payload run scripts/hola/test-session.ts --",
     "hola:settings": "payload run scripts/hola/settings.ts --",
     "hola:inquiries": "payload run scripts/hola/inquiries.ts --",
-    "hola:retention": "payload run scripts/hola/retention.ts --"
+    "hola:retention": "payload run scripts/hola/retention.ts --",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.91.0",

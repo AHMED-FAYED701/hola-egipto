@@ -1,19 +1,16 @@
-import config from '@payload-config'
-import { getPayload } from 'payload'
+/** `pnpm -s hola:health`: {"db":true,"version":"<SELECT VERSION()>","tables":n} (contracts §9). */
+import type { RowDataPacket } from 'mysql2'
 
-import { done, out } from './_lib'
+import { getPool } from '../../src/db/client'
+import { dbError, done, out } from './_cli'
 
-let db = false
-let ok = false
-let collections = 0
 try {
-  const payload = await getPayload({ config })
-  ok = true
-  collections = payload.config.collections.filter((c) => !c.slug.startsWith('payload-')).length
-  await payload.count({ collection: 'users', overrideAccess: true })
-  db = true
+  const pool = getPool()
+  const [[v]] = await pool.query<RowDataPacket[]>('SELECT VERSION() AS v')
+  const [[t]] = await pool.query<RowDataPacket[]>('SELECT COUNT(*) AS n FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()')
+  out({ db: true, version: String(v.v), tables: Number(t.n) })
+  await done(0)
 } catch (e) {
-  process.stderr.write(`health: ${(e as Error).message}\n`)
+  out({ db: false, error: dbError(e) })
+  await done(1)
 }
-out({ db, payload: ok, collections })
-done(db && ok ? 0 : 1)
