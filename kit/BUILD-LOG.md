@@ -199,3 +199,15 @@
 - Fixed while comparing: list tie-breaks now newest-first like the Local API (latest guides, home cards); `createdAt` sorting uses the id (seeded rows share a created_at second); the reading-time word count excludes shortcode blocks, as in v2.
 - Gates: lint 0, typecheck 0, build 0.
 - DONE
+
+## 2026-10-19 — M6 · Inquiries, mail, WhatsApp
+- The inquiry stack was moved to MySQL in M3 (`src/lib/inquiry.ts` on `src/lib/content/inquiries.ts`, rate limit counted in the database); this step verifies it against the production build.
+- `GET /api/hola/token` → token; JSON `POST /api/hola/inquiry` with `X-Hola-Test: 1` (trip `tour`/1) → `201 {"ok":true,"id":1,"redirect":"/gracias/?ref=…"}`, stored with `holaSample: true`; missing email → 422; honeypot → 400; form-encoded valid → `303 /en/thank-you/?ref=…`; form-encoded invalid → `303 /en/plan-my-trip/?errors=name,email#form`. `hola:inquiries count` → `{"total":2,"sample":2}`; `hola:inquiries last` shows lang/status/tracked/holaSample/utm.
+- Mail log: one line per `sendMail()` call (team + traveller per inquiry), all `to=(not-sent)` (ADMIN_EMAIL/SMTP empty, dev mode).
+- Thank-you: first load renders exactly one inline `generate_lead` push (counted like the acceptance script, ignoring the RSC payload copy), reload → 0, forged ref → 0; page is `noindex`. `markTracked()` is a conditional UPDATE, so concurrent loads cannot both fire.
+- Rate limit: 6 posts from one IP without the test header → `201 ×5, 429`.
+- WhatsApp with a temporary number (`hola:settings set whatsapp_number 34600000000`): header/sidebar/page/footer links on a tour page, all `https://wa.me/<number>?text=…`, `data-he-event="whatsapp_click"`, `data-he-location`, sidebar `data-he-trip` with the «title» — URL message; after clearing the number no `wa.me/` link is rendered. Number cleared (`""`).
+- Webhook: `N8N_WEBHOOK_URL` is empty (owner input), so `after()` posts nothing; code unchanged from v2 (signed `X-Hola-Signature`, 5 s timeout).
+- Test inquiries removed afterwards (8 rows with `@hola.test` emails, via a temporary script deleted after use).
+- Gates: lint 0, typecheck 0, build 0 (no code change in this step).
+- DONE
