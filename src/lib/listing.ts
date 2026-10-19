@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 
 import { isFiltered, pageNumber, type SP } from './archive'
-import { findTermBySlug, getSettings, termSlugIn } from './data'
+import { findTermBySlug, getSettings, termSlugIn } from './content/read'
 import { resolveLocale } from './locale'
 import { img } from './media'
 import { buildMetadata } from './seo'

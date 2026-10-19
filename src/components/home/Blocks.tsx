@@ -2,14 +2,14 @@ import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
-import { listAvailable } from '@/lib/data'
+import { listAvailable } from '@/lib/content/read'
 import { formatDate } from '@/lib/format'
 import { img } from '@/lib/media'
 import { getShell } from '@/lib/shell'
 import { tripCard, type TripDoc } from '@/lib/trips'
 import { archiveUrl, docUrl, fixedPageUrl, termUrl } from '@/lib/urls'
 import { defaultMessages } from '@/lib/whatsapp'
-import type { Departure, Page } from '@/payload-types'
+import type { Departure, HomeTexts, Page } from '@/lib/content/types'
 
 import { DestinationTile, GuideCard, TripCard } from '../Cards'
 import { Icon } from '../Icon'
@@ -210,27 +210,9 @@ async function TextSection({ b, locale }: { b: B<'text'>; locale: Locale }) {
       <Draft on={b.draft} locale={locale} />
       {b.eyebrow ? <span className="he-eyebrow">{b.eyebrow}</span> : null}
       {b.title ? <h2 id={`text-${b.id}`}>{b.title}</h2> : null}
-      <PendingRich data={b.body} />
+      <RichText data={b.body} />
     </section>
   )
-}
-
-/** Rich text where "[pendiente]" tokens get the dashed marker. */
-function PendingRich({ data }: { data: unknown }) {
-  const root = (data as { root?: { children?: { children?: { text?: string }[] }[] } })?.root
-  const paras = (root?.children || []).map((n) => (n.children || []).map((c) => c.text || '').join(''))
-  if (paras.some((p) => /\[(pendiente|pending)\]/.test(p))) {
-    return (
-      <div className="prose">
-        {paras.map((p, i) => (
-          <p key={i}>
-            <WithPending text={p} />
-          </p>
-        ))}
-      </div>
-    )
-  }
-  return <RichText data={data} />
 }
 
 function Team({ b }: { b: B<'team'> }) {
@@ -332,4 +314,21 @@ export async function Blocks({ blocks, locale }: { blocks: Page['layout']; local
       })}
     </>
   )
+}
+
+/** The home sections in their fixed order (contracts §4); texts from site-settings `home`. */
+export function homeBlocks(h: HomeTexts | null | undefined): NonNullable<Page['layout']> {
+  const x = h || {}
+  return [
+    { blockType: 'hero', id: 'hero', heading: x.hero?.heading || '', lead: x.hero?.lead, image: x.hero?.image, show_stats: x.hero?.show_stats ?? true, draft: x.hero?.draft },
+    { blockType: 'booking-band', id: 'booking-band' },
+    { blockType: 'trust-bar', id: 'trust-bar' },
+    { blockType: 'destinations-grid', id: 'destinations', ...x.destinations },
+    { blockType: 'trips-grid', id: 'trips', ...x.trips },
+    { blockType: 'cruises-split', id: 'cruises', ...x.cruises },
+    { blockType: 'excursions-by-city', id: 'excursions', ...x.excursions },
+    { blockType: 'why', id: 'why', ...x.why, columns: (x.why?.columns || []).map((c, i) => ({ ...c, id: String(i + 1) })) as never },
+    { blockType: 'guides-grid', id: 'guides', ...x.guides },
+    { blockType: 'cta-band', id: 'cta', ...x.cta },
+  ]
 }

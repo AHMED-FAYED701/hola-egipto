@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 
 import type { Locale } from '@/i18n/routing'
 
-import { alternateSlug, findAvailableBySlug, getSettings } from './data'
+import { alternateSlug, findAvailableBySlug, getSettings } from './content/read'
 import { img } from './media'
 import { buildMetadata } from './seo'
 import { type ContentCollection, docUrl, otherLocale } from './urls'

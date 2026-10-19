@@ -1,10 +1,10 @@
 import 'server-only'
 
-import type { Where } from 'payload'
+import type { Where } from '@/lib/content/types'
 
 import type { Locale } from '@/i18n/routing'
 
-import { findAvailableBySlug, findTermBySlug, listAvailable } from './data'
+import { findAvailableBySlug, findTermBySlug, listAvailable } from './content/read'
 import type { TripDoc } from './trips'
 import type { TripCollection } from './urls'
 

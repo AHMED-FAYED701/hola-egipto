@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
 import { pageNumber, type SP } from '@/lib/archive'
-import { listAvailable, listTerms } from '@/lib/data'
+import { listAvailable, listTerms } from '@/lib/content/read'
 import { formatDate } from '@/lib/format'
 import { img } from '@/lib/media'
 import { archiveUrl, docUrl, termUrl } from '@/lib/urls'

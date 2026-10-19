@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react'
 
 let adminPromise: Promise<boolean> | null = null
 
-/** True once the visitor is a logged-in admin/editor (Payload session); preview-cookie visitors are not. */
+/** True once the visitor is a logged-in admin/editor (`hola_session`); preview-cookie visitors are not. */
 function isAdmin(): Promise<boolean> {
   if (!adminPromise) {
-    adminPromise = fetch('/api/users/me', { credentials: 'same-origin', cache: 'no-store' })
+    adminPromise = fetch('/api/hola/me', { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => Boolean(d && d.user))
+      .then((d) => Boolean(d && d.admin))
       .catch(() => false)
   }
   return adminPromise

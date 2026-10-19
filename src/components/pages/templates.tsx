@@ -2,16 +2,15 @@ import { getTranslations } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
 import { type SP, sp } from '@/lib/archive'
-import { getSettings, listAvailable } from '@/lib/data'
+import { findById, getSettings, listAvailable } from '@/lib/content/read'
 import { formatDate } from '@/lib/format'
 import { img } from '@/lib/media'
-import { getPayloadClient } from '@/lib/payload'
+import { getInquiry, markTracked } from '@/lib/content/inquiries'
 import { makeInquiryToken, parseRef } from '@/lib/secrets'
 import { pushScript } from '@/lib/tracking'
-import { polyTrip } from '@/lib/trips'
-import { absolute, docUrl, fixedPageUrl, TRIP_TYPE, type TripCollection } from '@/lib/urls'
+import { absolute, docUrl, fixedPageUrl, TRIP_COLLECTION, TRIP_TYPE, type TripCollection, type TripType } from '@/lib/urls'
 import { defaultMessages } from '@/lib/whatsapp'
-import type { Page } from '@/payload-types'
+import type { Page } from '@/lib/content/types'
 
 import { GuideCard } from '../Cards'
 import { ContactForm } from '../forms/ContactForm'
@@ -117,24 +116,19 @@ export async function renderTemplateExtras(page: Page, locale: Locale, params: S
     const id = parseRef(sp(params, 'ref'))
     let lead: Record<string, unknown> | null = null
     if (id) {
-      const payload = await getPayloadClient()
-      try {
-        const inq = await payload.findByID({ collection: 'inquiries', id: Number(id), depth: 1, overrideAccess: true })
-        if (inq && !inq.tracked) {
-          const trip = polyTrip(inq.trip)
-          lead = {
-            event: 'generate_lead',
-            trip_id: trip ? String(trip[1].id) : null,
-            trip_name: trip ? trip[1].title : null,
-            trip_type: trip ? TRIP_TYPE[trip[0]] : null,
-            language: inq.lang,
-            form: inq.form,
-          }
-          // Mark as tracked so a reload never fires the conversion again (no revalidation on inquiries).
-          await payload.update({ collection: 'inquiries', id: inq.id, data: { tracked: true }, overrideAccess: true })
+      const inq = await getInquiry(Number(id))
+      // Flip `tracked` first: only the request that flips it renders the conversion (never on reload).
+      if (inq && !inq.tracked && (await markTracked(inq.id))) {
+        const type = (inq.trip_type || null) as TripType | null
+        const trip = type && inq.trip_id ? await findById<{ id: number; title: string }>(TRIP_COLLECTION[type], inq.trip_id, inq.lang === 'en' ? 'en' : 'es', 0) : null
+        lead = {
+          event: 'generate_lead',
+          trip_id: trip ? String(trip.id) : null,
+          trip_name: trip ? trip.title : null,
+          trip_type: trip ? type : null,
+          language: inq.lang,
+          form: inq.form,
         }
-      } catch {
-        lead = null
       }
     }
     const guides = await listAvailable('guides', locale, { limit: 3, sort: '-last_updated', depth: 1 })

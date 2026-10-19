@@ -1,11 +1,11 @@
-import { jwtVerify } from 'jose'
 import createIntlMiddleware from 'next-intl/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { routing } from './i18n/routing'
 import { existsIn, matchPath, type RouteIndex } from './lib/route-match'
 
-import { flag, payloadJwtKey, previewCookieValue, safeEqual } from './lib/secrets'
+import { flag, previewCookieValue, safeEqual } from './lib/secrets'
+import { SESSION_COOKIE, verifySession } from './lib/session'
 
 const PASS_FILES = new Set([
   '/favicon.ico',
@@ -37,15 +37,9 @@ function isFilePath(pathname: string): boolean {
   return last.includes('.')
 }
 
+/** Signature and expiry only (contracts §3); admin pages re-check the user and session_version. */
 async function hasAdminSession(req: NextRequest): Promise<boolean> {
-  const token = req.cookies.get('payload-token')?.value
-  if (!token) return false
-  try {
-    await jwtVerify(token, payloadJwtKey(), { algorithms: ['HS256'] })
-    return true
-  } catch {
-    return false
-  }
+  return Boolean(await verifySession(req.cookies.get(SESSION_COOKIE)?.value))
 }
 
 function hasPreviewCookie(req: NextRequest): boolean {

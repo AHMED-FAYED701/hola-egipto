@@ -1,8 +1,8 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 
-/** Server-only helpers around PAYLOAD_SECRET. Values are never logged. */
+/** Server-only helpers around APP_SECRET. Values are never logged. */
 
-const secret = () => process.env.PAYLOAD_SECRET || ''
+const secret = () => process.env.APP_SECRET || ''
 
 export function hmacHex(key: string, msg: string): string {
   return createHmac('sha256', key).update(msg).digest('hex')
@@ -17,11 +17,6 @@ export function safeEqual(a: string, b: string): boolean {
 /** Value of the `hola_preview` cookie (contracts §3). */
 export function previewCookieValue(): string {
   return hmacHex(secret(), 'preview|' + (process.env.HOLA_PREVIEW_KEY || ''))
-}
-
-/** Payload signs its JWT with the first 32 hex chars of SHA-256(PAYLOAD_SECRET). */
-export function payloadJwtKey(): Uint8Array {
-  return new TextEncoder().encode(createHash('sha256').update(secret()).digest('hex').slice(0, 32))
 }
 
 /** Inquiry token `<ts>.<hmac>` (contracts §7). */
@@ -51,7 +46,7 @@ export function parseRef(ref: unknown): string | null {
   return safeEqual(m[2], hmacHex(secret(), 'ref|' + m[1])) ? m[1] : null
 }
 
-/** Hex SHA-256 of the IP plus PAYLOAD_SECRET (inquiries.ip_hash). */
+/** Hex SHA-256 of the IP plus APP_SECRET (inquiries.ip_hash, login_attempts.ip_hash). */
 export function ipHash(ip: string): string {
   return createHash('sha256').update(ip + secret()).digest('hex')
 }

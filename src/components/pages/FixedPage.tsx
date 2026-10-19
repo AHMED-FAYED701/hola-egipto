@@ -3,11 +3,11 @@ import { getTranslations } from 'next-intl/server'
 import type { ReactNode } from 'react'
 
 import type { Locale } from '@/i18n/routing'
-import { getSettings } from '@/lib/data'
+import { getSettings } from '@/lib/content/read'
 import { formatDate } from '@/lib/format'
 import { homeUrl, pageUrl } from '@/lib/urls'
 import { defaultMessages } from '@/lib/whatsapp'
-import type { Page } from '@/payload-types'
+import type { Page } from '@/lib/content/types'
 
 import { AdminPending } from '../AdminPending'
 import { Breadcrumbs } from '../Breadcrumbs'
@@ -16,7 +16,7 @@ import { Blocks } from '../home/Blocks'
 import { JsonLd } from '../JsonLd'
 import { WithPending } from '../Pending'
 import { CtaBand } from '../Sections'
-import { SimpleRich } from '../SimpleRich'
+import { RichText } from '../RichText'
 import { WhatsAppLink } from '../WhatsAppLink'
 import s from './pages.module.css'
 
@@ -87,7 +87,7 @@ export async function FixedPage({ page, locale, extras = {} }: { page: Page; loc
               </p>
             ) : null}
           </header>
-          <SimpleRich data={page.content} />
+          <RichText data={page.content} />
         </div>
       </>
     )
@@ -101,7 +101,7 @@ export async function FixedPage({ page, locale, extras = {} }: { page: Page; loc
         {head}
         <div className={`container ${s.twoCol}`}>
           <div>
-            <SimpleRich data={page.content} />
+            <RichText data={page.content} />
             {extras.form}
           </div>
           <aside className={s.panel} aria-labelledby="contact-methods">
@@ -153,7 +153,7 @@ export async function FixedPage({ page, locale, extras = {} }: { page: Page; loc
       {head}
       <div className={`container ${s.twoCol}`}>
         <div>
-          <SimpleRich data={page.content} />
+          <RichText data={page.content} />
           {extras.form}
         </div>
         {extras.aside ? <aside className={s.panel}>{extras.aside}</aside> : null}

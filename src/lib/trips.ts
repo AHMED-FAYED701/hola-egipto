@@ -1,4 +1,4 @@
-import type { Cruise, Destination, Excursion, Guide, Tour } from '@/payload-types'
+import type { Cruise, Destination, Excursion, Guide, Tour } from '@/lib/content/types'
 import type { Locale } from '@/i18n/routing'
 
 import { formatPrice } from './format'

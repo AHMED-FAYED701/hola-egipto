@@ -2,20 +2,20 @@ import Image from 'next/image'
 import { Lightbulb } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-import type { Destination, Guide, GuideTopic } from '@/payload-types'
+import type { Destination, Guide, GuideTopic } from '@/lib/content/types'
 import type { Locale } from '@/i18n/routing'
-import { getSettings, listAvailable } from '@/lib/data'
+import { findById, getSettings, listAvailable } from '@/lib/content/read'
 import { formatDate } from '@/lib/format'
 import { img } from '@/lib/media'
 import { readingMinutes } from '@/lib/format'
 import { polyTrip, tripCard, type TripDoc } from '@/lib/trips'
-import { absolute, archiveUrl, docUrl, homeUrl, termUrl, type TripCollection } from '@/lib/urls'
+import { absolute, archiveUrl, docUrl, homeUrl, termUrl, TRIP_COLLECTION, type TripCollection } from '@/lib/urls'
 
 import { Breadcrumbs } from '../Breadcrumbs'
 import { DestinationTile, GuideCard, TripCard } from '../Cards'
 import { JsonLd } from '../JsonLd'
 import { WithPending } from '../Pending'
-import { headings, plainText, RichText } from '../RichText'
+import { headings, plainText, type RichBlocks, RichText } from '../RichText'
 import { CtaBand } from '../Sections'
 import s from './guide.module.css'
 
@@ -35,8 +35,8 @@ export async function GuidePage({ doc, locale }: { doc: Guide; locale: Locale })
   const more = await listAvailable('guides', locale, { where: { id: { not_equals: doc.id } }, limit: 3, sort: '-last_updated' })
   const author = doc.author_name || (locale === 'es' ? '[pendiente]' : '[pending]')
 
-  const blocks = {
-    'tip-box': (f: Record<string, unknown>) => (
+  const blocks: RichBlocks = {
+    'tip-box': (f) => (
       <aside className={s.tip}>
         <Lightbulb aria-hidden="true" size={24} strokeWidth={1.75} />
         <div>
@@ -47,12 +47,13 @@ export async function GuidePage({ doc, locale }: { doc: Guide; locale: Locale })
         </div>
       </aside>
     ),
-    'trip-card': (f: Record<string, unknown>) => {
-      const p = polyTrip(f.trip)
-      if (!p || !(p[1] as { available?: boolean }).available) return null
+    'trip-card': async (f) => {
+      const collection = TRIP_COLLECTION[f.tripType]
+      const trip = await findById<TripDoc>(collection, f.id, locale, 1)
+      if (!trip || !trip.available) return null
       return (
         <div className={s.tripCard}>
-          <TripCard trip={tripCard(p[1], p[0], locale, tt)} fromLabel={tc('from')} />
+          <TripCard trip={tripCard(trip, collection, locale, tt)} fromLabel={tc('from')} />
         </div>
       )
     },

@@ -318,6 +318,10 @@ a.chip[aria-current='page'] {
 .prose {
   max-width: 44rem;
 }
+/* Markdown runs between guide shortcodes: no box of their own */
+.prose > .md {
+  display: contents;
+}
 .prose h2 {
   margin-top: var(--he-space-7);
 }

@@ -1,9 +1,9 @@
 import { Check, Clock, Languages, MapPin, Minus, Users, Utensils, Bed } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-import type { Cruise, Departure, Destination, Excursion, Guide, Tour, TripStyle } from '@/payload-types'
+import type { Cruise, Departure, Destination, Excursion, Guide, Tour, TripStyle } from '@/lib/content/types'
 import type { Locale } from '@/i18n/routing'
-import { getSettings, listAvailable } from '@/lib/data'
+import { getSettings, listAvailable } from '@/lib/content/read'
 import { formatMonthYear, formatPrice, currencyFor } from '@/lib/format'
 import { img, type Img } from '@/lib/media'
 import { pushScript } from '@/lib/tracking'

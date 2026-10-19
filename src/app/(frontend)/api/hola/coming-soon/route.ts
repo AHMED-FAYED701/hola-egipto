@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-import { getSharedSettings } from '@/lib/settings'
+import { getSharedSettings } from '@/lib/content/read'
 import { whatsappUrl } from '@/lib/whatsapp'
 
 export const dynamic = 'force-dynamic'

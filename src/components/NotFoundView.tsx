@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
-import { listAvailable } from '@/lib/data'
+import { listAvailable } from '@/lib/content/read'
 import { tripCard, type TripDoc } from '@/lib/trips'
 import { archiveUrl, searchUrl, type ContentCollection } from '@/lib/urls'
 

@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Blocks } from '@/components/home/Blocks'
+import { Blocks, homeBlocks } from '@/components/home/Blocks'
 import { PageShell } from '@/components/PageShell'
-import { findPageByTemplate } from '@/lib/data'
+import { findPageByTemplate, getSettings } from '@/lib/content/read'
 import { resolveLocale } from '@/lib/locale'
 import { img } from '@/lib/media'
 import { buildMetadata } from '@/lib/seo'
@@ -27,11 +27,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Home({ params }: Props) {
   const locale = await resolveLocale(params)
-  const page = await findPageByTemplate('home', locale, 2)
+  const [page, settings] = await Promise.all([findPageByTemplate('home', locale, 1), getSettings(locale)])
   if (!page) notFound()
   return (
     <PageShell locale={locale} alternates={{ es: '/', en: '/en/' }}>
-      <Blocks blocks={page.layout} locale={locale} />
+      <Blocks blocks={homeBlocks(settings.home)} locale={locale} />
     </PageShell>
   )
 }

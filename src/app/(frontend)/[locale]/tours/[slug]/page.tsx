@@ -6,7 +6,7 @@ import { formatPrice } from '@/lib/format'
 import { singleMetadata } from '@/lib/meta-single'
 import { loadSingle } from '@/lib/single'
 import { fixedPageUrl } from '@/lib/urls'
-import type { Tour } from '@/payload-types'
+import type { Tour } from '@/lib/content/types'
 
 type Params = { params: Promise<{ locale: string; slug: string }> }
 

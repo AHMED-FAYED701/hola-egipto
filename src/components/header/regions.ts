@@ -1,7 +1,7 @@
 import 'server-only'
 
 import type { Locale } from '@/i18n/routing'
-import { listTerms } from '@/lib/data'
+import { listTerms } from '@/lib/content/read'
 import { termUrl } from '@/lib/urls'
 
 import { type MapRegion, REGION_KEYS } from '../EgyptMap'

@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server'
 
 import type { Locale } from '@/i18n/routing'
 import { type Preset, queryTrips, type SP, sp, withParams } from '@/lib/archive'
-import { listAvailable, listTerms } from '@/lib/data'
+import { listAvailable, listTerms } from '@/lib/content/read'
 import type { Img } from '@/lib/media'
 import { tripCard } from '@/lib/trips'
 import { termUrl, type TripCollection } from '@/lib/urls'

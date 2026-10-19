@@ -2,22 +2,16 @@ import { after } from 'next/server'
 
 import { isLocale, type Locale } from '@/i18n/routing'
 import { type Fields, message, notify, one, postWebhook, store, validate } from '@/lib/inquiry'
-import { getPayloadClient } from '@/lib/payload'
+import { countRecentByIp } from '@/lib/content/inquiries'
 import { flag, ipHash, verifyInquiryToken } from '@/lib/secrets'
 import { siteUrl } from '@/lib/site'
 import { fixedPageUrl } from '@/lib/urls'
 
 export const dynamic = 'force-dynamic'
 
-const RATE: Map<string, number[]> = ((globalThis as { __holaRate?: Map<string, number[]> }).__holaRate ??= new Map())
-const HOUR = 3600_000
-
-function rateLimited(hash: string): boolean {
-  const now = Date.now()
-  const hits = (RATE.get(hash) || []).filter((t) => now - t < HOUR)
-  hits.push(now)
-  RATE.set(hash, hits)
-  return hits.length > 5
+/** More than 5 per ip_hash per hour (contracts §7); counted in the database, not in memory (Hostinger idles processes). */
+async function rateLimited(hash: string): Promise<boolean> {
+  return (await countRecentByIp(hash)) >= 5
 }
 
 async function readFields(req: Request): Promise<{ fields: Fields; isForm: boolean } | null> {
@@ -108,15 +102,14 @@ export async function POST(req: Request) {
     return fail(400, { form: message(lang, 'form') })
   }
 
-  if (!test && rateLimited(hash)) return fail(429, { form: message(lang, 'rate') })
+  if (!test && (await rateLimited(hash))) return fail(429, { form: message(lang, 'rate') })
 
-  const payload = await getPayloadClient()
-  const { errors, result } = await validate(payload, fields, lang)
+  const { errors, result } = await validate(fields, lang)
   if (!result) return fail(422, errors)
 
-  const { doc, redirect } = await store(payload, result, { ipHash: hash, sample: test })
-  await notify(payload, result, doc.id)
-  after(() => postWebhook(result, doc.id, doc.createdAt))
+  const { doc, redirect } = await store(result, { ipHash: hash, sample: test })
+  await notify(result, doc.id)
+  after(() => postWebhook(result, doc.id, doc.created_at.toISOString()))
 
   if (isForm) return new Response(null, { status: 303, headers: { Location: redirect, ...noStore } })
   return Response.json({ ok: true, id: doc.id, redirect }, { status: 201, headers: noStore })

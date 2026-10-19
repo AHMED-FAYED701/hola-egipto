@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 
 import type { Locale } from '@/i18n/routing'
 
-import { alternateSlug, findAvailableBySlug } from './data'
+import { alternateSlug, findAvailableBySlug } from './content/read'
 import { resolveLocale } from './locale'
 import { type ContentCollection, docUrl, otherLocale } from './urls'
 

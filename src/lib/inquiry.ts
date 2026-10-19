@@ -1,9 +1,9 @@
 import 'server-only'
 
-import type { Payload } from 'payload'
-
 import type { Locale } from '@/i18n/routing'
 
+import { createInquiry, type InquiryRow } from './content/inquiries'
+import { findById, getSettings } from './content/read'
 import { sendMail } from './mail'
 import { makeRef } from './secrets'
 import { absolute, docUrl, fixedPageUrl, TRIP_COLLECTION, type TripType } from './urls'
@@ -54,7 +54,7 @@ export interface Validated {
 }
 
 /** Field validation (contracts §7). Returns errors keyed by field, in the inquiry language. */
-export async function validate(payload: Payload, f: Fields, lang: Locale): Promise<{ errors: Record<string, string>; result?: Validated }> {
+export async function validate(f: Fields, lang: Locale): Promise<{ errors: Record<string, string>; result?: Validated }> {
   const errors: Record<string, string> = {}
   const form = one(f, 'form') === 'contact' ? 'contact' : 'plan_my_trip'
   const name = one(f, 'name')
@@ -81,9 +81,8 @@ export async function validate(payload: Payload, f: Fields, lang: Locale): Promi
     const id = Number(tripId)
     if (!collection || !Number.isInteger(id)) errors.trip = message(lang, 'trip')
     else {
-      const res = await payload.find({ collection, locale: lang, depth: 0, limit: 1, where: { and: [{ id: { equals: id } }, { available: { equals: true } }] } })
-      const d = res.docs[0]
-      if (!d) errors.trip = message(lang, 'trip')
+      const d = await findById<{ title: string; slug: string | null; available: boolean }>(collection, id, lang, 0)
+      if (!d || !d.available) errors.trip = message(lang, 'trip')
       else trip = { collection, id, title: d.title, url: absolute(docUrl(collection, d.slug || '', lang)), type: tripType }
     }
   }
@@ -105,7 +104,8 @@ export async function validate(payload: Payload, f: Fields, lang: Locale): Promi
       trip,
       data: {
         form,
-        trip: trip ? { relationTo: trip.collection, value: trip.id } : null,
+        trip_type: trip ? trip.type : null,
+        trip_id: trip ? trip.id : null,
         interests: many(f, 'interests').map((x) => clip(x, 60)),
         length: clip(one(f, 'length'), 60),
         date_mode: ['exact', 'month', 'flexible'].includes(dateMode) ? dateMode : null,
@@ -123,7 +123,7 @@ export async function validate(payload: Payload, f: Fields, lang: Locale): Promi
         whatsapp: clip(one(f, 'whatsapp'), 40),
         channel: channel === 'whatsapp' || channel === 'email' ? channel : null,
         message: msg,
-        consent_at: new Date().toISOString(),
+        consent_at: new Date(),
         marketing: ['1', 'on', 'true'].includes(one(f, 'marketing')),
         lang,
         page_url: clip(one(f, 'page_url'), 500),
@@ -145,25 +145,28 @@ export async function validate(payload: Payload, f: Fields, lang: Locale): Promi
 const stamp = (d: Date) => new Intl.DateTimeFormat('sv-SE', { timeZone: 'Africa/Cairo', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(d)
 
 /** Store, mail and return the thank-you redirect path. */
-export async function store(payload: Payload, v: Validated, extra: { ipHash: string; sample: boolean }) {
+export async function store(v: Validated, extra: { ipHash: string; sample: boolean }): Promise<{ doc: InquiryRow; ref: string; redirect: string }> {
   const lang = v.data.lang as Locale
-  const title = `${v.data.name} · ${v.trip?.title ?? 'Sin viaje'} · ${stamp(new Date())}`
-  const doc = await payload.create({
-    collection: 'inquiries',
-    data: { ...v.data, title, status: 'new', tracked: false, ip_hash: extra.ipHash, holaSample: extra.sample } as never,
-    overrideAccess: true,
+  const title = `${v.data.name} · ${v.trip?.title ?? 'Sin viaje'} · ${stamp(new Date())}`.slice(0, 255)
+  const doc = await createInquiry({
+    ...(v.data as Omit<InquiryRow, 'id' | 'title' | 'status' | 'tracked' | 'ip_hash' | 'hola_sample' | 'created_at' | 'updated_at'>),
+    title,
+    status: 'new',
+    tracked: false,
+    ip_hash: extra.ipHash,
+    hola_sample: extra.sample,
   })
   const ref = makeRef(doc.id)
   return { doc, ref, redirect: `${fixedPageUrl('thank-you', lang)}?ref=${ref}` }
 }
 
 /** Team notification + traveller auto-reply, both through sendMail(). */
-export async function notify(payload: Payload, v: Validated, id: number) {
+export async function notify(v: Validated, id: number) {
   const lang = v.data.lang as Locale
-  const settings = await payload.findGlobal({ slug: 'site-settings', locale: lang, depth: 0 })
+  const settings = await getSettings(lang)
   const team = settings.contact_email || process.env.ADMIN_EMAIL || ''
   const lines = Object.entries(v.data)
-    .filter(([k]) => k !== 'trip')
+    .filter(([k]) => k !== 'trip_type' && k !== 'trip_id')
     .map(([k, val]) => `${k}: ${typeof val === 'object' && val !== null ? JSON.stringify(val) : String(val ?? '')}`)
   if (v.trip) lines.unshift(`trip: ${v.trip.title} (${v.trip.url})`)
   await sendMail({

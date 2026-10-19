@@ -12,17 +12,20 @@ import { preload } from 'react-dom'
 import { ConsentBanner } from '@/components/Consent'
 import { Tracking } from '@/components/Tracking'
 import { routing } from '@/i18n/routing'
-import { getSettings } from '@/lib/data'
+import { getSettings } from '@/lib/content/read'
 import { siteUrl } from '@/lib/site'
 import { DATALAYER_BOOTSTRAP, gtmSnippet } from '@/lib/tracking'
 import { fixedPageUrl } from '@/lib/urls'
 
 export const generateStaticParams = () => []
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl()),
-  title: { default: 'Hola Egipto', template: '%s' },
-  applicationName: 'Hola Egipto',
+// metadataBase comes from SITE_URL at request time (contracts §10, §19), never at build time.
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL(siteUrl()),
+    title: { default: 'Hola Egipto', template: '%s' },
+    applicationName: 'Hola Egipto',
+  }
 }
 
 export const viewport: Viewport = { themeColor: '#133232', width: 'device-width', initialScale: 1 }
