@@ -241,3 +241,12 @@
 - Also in place from earlier steps (§19): redirects from the interceptor are built from `SITE_URL`; cookies get `Secure` when `SITE_URL` is https; no native modules at runtime (`sharp` dev-only, never imported by app code; image sizes for "scan" read in pure JS).
 - Gates: lint 0, typecheck 0, build 0.
 - DONE
+
+## 2026-10-19 — M10 · Acceptance and report
+- Trial acceptance run against the M9 build: `pass=162 fail=0 warn=1 blocked=9`, so no app fix was needed.
+- Final sequence after the last code commit (`2b74a89`): stopped the server and checked port 3000 was free. `DATABASE_URL=mysql://x:x@127.0.0.1:1/x pnpm build` → exit 0. `pnpm build` → exit 0. `pnpm start` in the background, output appended to `kit/logs/server.log`; robots.txt answered 200. Then `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt` → **`ACCEPTANCE SUMMARY: pass=162 fail=0 warn=1 blocked=9`**.
+- WARN A14: 4 error lines in `kit/logs/server.log` (lines 86, 93, 114, 146), all from before the final server start. They come from two bugs found and fixed during M7 and M8 (the relative redirect in the interceptor, and NULL `price_basis` on the first admin save). The log is appended, never truncated.
+- The 9 BLOCKED are the owner inputs: WhatsApp, contact email, legal name, licence, GTM, ADMIN_EMAIL, SMTP, Turnstile, n8n.
+- `kit/BUILD-REPORT.md` rewritten for v3 from `kit/docs/06-REPORT-TEMPLATE.md`. It contains no secret values (checked without printing them).
+- Script changes: none.
+- DONE
