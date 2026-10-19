@@ -98,10 +98,10 @@ export function headings(md: string | null | undefined): { id: string; text: str
     .map((t) => ({ id: slugify(tokenText(t)), text: tokenText(t) }))
 }
 
-/** Visible words only (reading time, search snippets). */
+/** Words of the Markdown runs (reading time); shortcode blocks are not counted, as in v2. */
 export function plainText(md: string | null | undefined): string {
   return segments(md)
-    .map((s) => (s.kind === 'md' ? s.text : s.kind === 'tip' ? `${s.title} ${s.text}` : ''))
+    .map((s) => (s.kind === 'md' ? s.text : ''))
     .join('\n')
     .replace(/[#>*_`~\-|[\]()]/g, ' ')
     .replace(/\s+/g, ' ')

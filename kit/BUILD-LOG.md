@@ -189,3 +189,13 @@
 - `grep -rnE "from ['\"](payload|@payloadcms/)|getPayload|payload\.config|payload-types|withPayload" src scripts package.json next.config.*` → nothing.
 - Gates: lint 0, typecheck 0, build 0 (4 m 41 s; compile 21 s instead of ~11 min with Payload).
 - DONE
+
+## 2026-10-19 — M5 · Site on MySQL
+- Production build + `pnpm start` (output appended to `kit/logs/server.log`), preview cookie via `?hola_preview=`.
+- `pnpm -s hola:urls` → 104 rows, **identical** to the v2 list in `kit/logs/v2-urls.tsv` (home 2, archive 10, single 36, term 34, page 18, search 2, 404 2). Every row answers its expected status (0 mismatches). No error lines in the server log.
+- Comparison with the v2 baseline (all 104 pages, not only the 6 required), with a scratchpad script that compares lang, title, h1–h3, meta description, robots, og:title/og:locale, canonical + hreflang, JSON-LD types, internal links, section and image counts: **94/104 identical**; the other 10 differ only in the trip id inside `/planifica-tu-viaje/?trip=<type>-<id>` links (ids are allowed to differ).
+- Visible-text comparison: differences are only (a) dates — seeded today (19 Oct) instead of 18 Oct; (b) the cookie policy listing `hola_session` / `hola_admin_lang` instead of `payload-token` (content rules §6); (c) cruise start dates now show the stored date (`2027-01-11` → "11 de enero"): v2 displayed them one day early because of a Payload date/timezone shift — a v2 bug, fixed; (d) one guide's reading time (4 → 5 min): v2's Lexical text extraction glued paragraphs together and undercounted words.
+- `robots.txt` byte-identical; `sitemap.xml` has the same 98 URLs and 294 `xhtml:link` alternates.
+- Fixed while comparing: list tie-breaks now newest-first like the Local API (latest guides, home cards); `createdAt` sorting uses the id (seeded rows share a created_at second); the reading-time word count excludes shortcode blocks, as in v2.
+- Gates: lint 0, typecheck 0, build 0.
+- DONE

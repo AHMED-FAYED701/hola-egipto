@@ -83,11 +83,13 @@ function orderSql(ent: Ent, sort: string | string[] | undefined): SQL[] {
   for (const raw of keys) {
     const dir = raw.startsWith('-') ? desc : asc
     const k = raw.replace(/^-/, '')
+    // Ids grow with creation time (and are finer than created_at's seconds).
     const col =
-      k === 'createdAt' ? main.created_at : k === 'updatedAt' ? main.updated_at : I18N_FIELDS.has(k) ? i18n[k] : main[MAIN_ALIAS[k] ?? k]
+      k === 'createdAt' ? main.id : k === 'updatedAt' ? main.updated_at : I18N_FIELDS.has(k) ? i18n[k] : main[MAIN_ALIAS[k] ?? k]
     if (col) out.push(dir(col))
   }
-  out.push(asc(main.id))
+  // Ties: newest first, as the v2 Local API did (its default order was -createdAt).
+  out.push(desc(main.id))
   return out
 }
 
