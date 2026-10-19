@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hola Egipto acceptance checks (Next.js + Payload). Stdlib only.
+"""Hola Egipto acceptance checks (Next.js + MySQL, v3). Stdlib only.
 
 Run via `bash kit/bin/acceptance.sh` from anywhere; paths are resolved from this file.
 Never prints secrets: values from .env.local are only compared, never echoed.
@@ -55,8 +55,8 @@ def read_env(path):
 
 
 ENV = read_env(os.path.join(ROOT, ".env.local")) or {}
-BASE = (os.environ.get("BASE_URL") or ENV.get("NEXT_PUBLIC_SITE_URL") or "http://localhost:3000").rstrip("/")
-SITE = (ENV.get("NEXT_PUBLIC_SITE_URL") or BASE).rstrip("/")
+BASE = (os.environ.get("BASE_URL") or ENV.get("SITE_URL") or "http://localhost:3000").rstrip("/")
+SITE = (ENV.get("SITE_URL") or BASE).rstrip("/")
 PREVIEW_KEY = ENV.get("HOLA_PREVIEW_KEY", "")
 
 
@@ -280,7 +280,7 @@ def ld_types(objs):
 # ============================================================== the checks
 STATE = {"server": False, "cookie": None, "schema": None, "urls": []}
 
-PAYLOAD_TRIP_BASES = {"/viajes-a-egipto/": "tour", "/en/egypt-tours/": "tour",
+TRIP_BASES = {"/viajes-a-egipto/": "tour", "/en/egypt-tours/": "tour",
                       "/cruceros-por-el-nilo/": "cruise", "/en/nile-cruises/": "cruise",
                       "/excursiones/": "excursion", "/en/excursions/": "excursion"}
 DEST_BASES = ("/destinos/", "/en/destinations/")
@@ -311,11 +311,15 @@ def a0_environment():
     if not os.path.isfile(os.path.join(ROOT, ".env.local")):
         rec("FAIL", "A0", ".env.local missing in the repository root")
     else:
-        for k in ("DATABASE_URI", "PAYLOAD_SECRET", "HOLA_PREVIEW_KEY", "NEXT_PUBLIC_SITE_URL"):
+        for k in ("DATABASE_URL", "APP_SECRET", "HOLA_PREVIEW_KEY", "SITE_URL"):
             check(ENV.get(k), "A0", f".env.local has {k}", f".env.local: {k} missing or empty")
         check(ENV.get("HOLA_COMING_SOON") == "1", "A0", "HOLA_COMING_SOON=1",
               "HOLA_COMING_SOON must be 1 during the build")
         check(ENV.get("HOLA_DEV_MODE") == "1", "A0", "HOLA_DEV_MODE=1", "HOLA_DEV_MODE must be 1 during the build")
+        stale = [k for k in ("DATABASE_URI", "PAYLOAD_SECRET", "NEXT_PUBLIC_SITE_URL") if k in ENV]
+        check(not stale, "A0", "no obsolete v2 keys in .env.local", f".env.local still has obsolete keys: {', '.join(stale)}")
+        check(ENV.get("DATABASE_URL", "").startswith("mysql://"), "A0", "DATABASE_URL is a mysql:// URL",
+              "DATABASE_URL is not a mysql:// URL (value not shown)")
     r = http("/robots.txt", timeout=15)
     STATE["server"] = r.status == 200
     check(STATE["server"], "A0", f"server answers at {BASE}",
@@ -331,24 +335,44 @@ def a1_structure():
         return
     pj = json.load(open(pj_path))
     scripts = pj.get("scripts", {})
-    need = ["dev", "build", "start", "lint", "typecheck", "migrate", "hola:health", "hola:schema", "hola:seed",
-            "hola:placeholders", "hola:samples", "hola:urls", "hola:token", "hola:preview-url",
-            "hola:test-session", "hola:settings", "hola:inquiries", "hola:retention"]
+    need = ["dev", "build", "start", "lint", "typecheck", "migrate", "db:generate", "hola:health", "hola:schema",
+            "hola:seed", "hola:placeholders", "hola:samples", "hola:urls", "hola:token", "hola:preview-url",
+            "hola:setup-url", "hola:test-session", "hola:settings", "hola:inquiries", "hola:retention",
+            "hola:deploy-check"]
     missing = [s for s in need if s not in scripts]
     check(not missing, "A1", "package.json scripts present", f"package.json scripts missing: {', '.join(missing)}")
-    files = ["src/payload.config.ts", "src/i18n/routing.ts", "src/messages/es.json", "src/messages/en.json",
-             "src/lib/mail.ts", "src/lib/whatsapp.ts"]
+    files = ["src/db/schema.ts", "src/db/client.ts", "src/db/model.ts", "drizzle.config.ts", "src/lib/auth.ts",
+             "src/lib/site.ts", "src/instrumentation.ts", "src/i18n/routing.ts", "src/messages/es.json",
+             "src/messages/en.json", "src/lib/mail.ts", "src/lib/whatsapp.ts"]
     for f in files:
         check(os.path.isfile(os.path.join(ROOT, f)), "A1", f"{f}", f"{f} missing")
     check(any(os.path.isfile(os.path.join(ROOT, f)) for f in ("src/proxy.ts", "src/middleware.ts")), "A1",
           "request interceptor (src/proxy.ts or src/middleware.ts)", "src/proxy.ts / src/middleware.ts missing")
-    mig = os.path.join(ROOT, "src", "migrations")
-    n = len([f for f in os.listdir(mig) if f.endswith(".ts") and f != "index.ts"]) if os.path.isdir(mig) else 0
-    check(n >= 1, "A1", f"{n} Payload migration(s)", "no Payload migrations in src/migrations")
+    mig = os.path.join(ROOT, "drizzle")
+    n = len([f for f in os.listdir(mig) if f.endswith(".sql")]) if os.path.isdir(mig) else 0
+    check(n >= 1, "A1", f"{n} Drizzle migration(s) in drizzle/", "no Drizzle SQL migrations in drizzle/")
+    sql = ""
+    if os.path.isdir(mig):
+        for f in sorted(os.listdir(mig)):
+            if f.endswith(".sql"):
+                sql += open(os.path.join(mig, f), encoding="utf-8", errors="ignore").read().lower()
+    bad_sql = [w for w in (" json,", " json\n", " json not null", " json default", "check (", " returning ",
+                           "text default", "longtext default") if w in sql]
+    check(not bad_sql, "A1", "migrations avoid native json/CHECK/RETURNING (MariaDB-safe)",
+          f"migrations use MariaDB-unsafe SQL: {bad_sql}")
+    gone = [f for f in ("src/payload.config.ts", "src/app/(payload)", "src/collections", "src/globals", "src/migrations",
+                        "src/payload-types.ts") if os.path.exists(os.path.join(ROOT, f))]
+    check(not gone, "A1", "Payload code removed", f"Payload leftovers still present: {', '.join(gone)}")
     deps = {**pj.get("dependencies", {}), **pj.get("devDependencies", {})}
-    bad = [d for d in deps if d in ("tailwindcss", "sass", "node-sass", "styled-components", "jquery", "bootstrap")
-           or d.startswith("@emotion/") or d.startswith("@mui/") or d.startswith("@chakra-ui/")]
-    check(not bad, "A1", "no forbidden styling/UI dependencies", f"forbidden dependencies: {', '.join(bad)}")
+    bad = [d for d in deps if d in ("tailwindcss", "sass", "node-sass", "styled-components", "jquery", "bootstrap",
+                                    "payload", "graphql", "pg", "@prisma/client", "prisma")
+           or d.startswith(("@emotion/", "@mui/", "@chakra-ui/", "@payloadcms/"))]
+    check(not bad, "A1", "no forbidden dependencies (UI kits, Payload, Postgres)", f"forbidden dependencies: {', '.join(bad)}")
+    need_deps = [d for d in ("drizzle-orm", "mysql2", "bcryptjs", "jose", "nodemailer") if d not in pj.get("dependencies", {})]
+    check(not need_deps, "A1", "runtime dependencies present (drizzle-orm, mysql2, bcryptjs, jose, nodemailer)",
+          f"missing runtime dependencies: {', '.join(need_deps)}")
+    check("sharp" not in pj.get("dependencies", {}), "A1", "sharp is not a runtime dependency",
+          "sharp is in dependencies (must be a devDependency only)")
     hits = []
     for base, _, fs in os.walk(os.path.join(ROOT, "src")):
         for f in fs:
@@ -362,7 +386,9 @@ def a1_structure():
                     continue
                 if "next/font/google" in t or "fonts.googleapis" in t or "fonts.gstatic" in t:
                     hits.append(os.path.relpath(p, ROOT))
-    check(not hits, "A1", "no Google Fonts, next/font/google or Sass in src/",
+                if "NEXT_PUBLIC_SITE_URL" in t or "from 'payload'" in t or 'from "payload"' in t or "@payloadcms/" in t:
+                    hits.append(os.path.relpath(p, ROOT) + " (NEXT_PUBLIC_SITE_URL/payload)")
+    check(not hits, "A1", "no Google Fonts, Sass, Payload imports or NEXT_PUBLIC_SITE_URL in src/",
           f"Google Fonts / Sass found in: {', '.join(hits[:5])}")
     leaked = []
     pub = os.path.join(ROOT, "public")
@@ -419,9 +445,9 @@ def a5_coming_soon():
               "coming-soon page lacks <meta name=robots content=noindex>")
     r = http("/en/egypt-tours/")
     check(r.status == 503, "A5", "visitor gets 503 on /en/egypt-tours/", f"visitor got {r.status} on /en/egypt-tours/")
-    r = http("/", cookies={"payload-token": "garbage"})
-    check(r.status == 503, "A5", "invalid payload-token is treated as a visitor",
-          f"payload-token=garbage got {r.status} (must be 503)")
+    r = http("/", cookies={"hola_session": "garbage"})
+    check(r.status == 503, "A5", "invalid hola_session is treated as a visitor",
+          f"hola_session=garbage got {r.status} (must be 503)")
     r = http("/?hola_preview=wrong-key-" + str(int(time.time())))
     check(r.status in (503, 307, 302) and not set_cookie_value(r, "hola_preview"), "A5", "wrong preview key sets no cookie",
           f"wrong preview key: status {r.status}, cookie set={bool(set_cookie_value(r, 'hola_preview'))}")
@@ -432,7 +458,10 @@ def a5_coming_soon():
         r = http(url)
         hops += 1
     st = r.status
-    check(st == 200, "A5", "/admin reachable", f"/admin answered {st}")
+    check(st == 200 and "/admin/login" in url, "A5", "/admin leads visitors to the login page (200)",
+          f"/admin ended at {url} with {st} (expected the /admin/login page)")
+    r = http("/admin/setup")
+    check(r.status == 404, "A5", "/admin/setup without key → 404", f"/admin/setup without key answered {r.status}")
     r = http("/api/hola/token")
     tok_ok = r.status == 200
     try:
@@ -471,8 +500,17 @@ def a6_preview_and_session():
         rec("FAIL", "A6", "`pnpm hola:test-session create` did not return a token")
         return
     try:
-        r = http("/en/", cookies={"payload-token": data["token"]})
+        sess = {"hola_session": data["token"]}
+        r = http("/en/", cookies=sess)
         check(r.status == 200, "A6", "admin session shows the real site", f"admin session got {r.status} on /en/")
+        r = http("/admin", cookies=sess)
+        hops, url = 0, BASE + "/admin"
+        while r.status in (301, 302, 303, 307, 308) and hops < 3:
+            url = urllib.parse.urljoin(url, r.h("Location") or "/")
+            r = http(url, cookies=sess)
+            hops += 1
+        check(r.status == 200 and "/admin/login" not in url, "A6", "admin session opens the admin dashboard",
+              f"with a session /admin ended at {url} with {r.status}")
     finally:
         d = hola_json("test-session delete")
         check(d is not None and d.get("deleted", 0) >= 1, "A6", "temporary test user deleted",
@@ -506,8 +544,8 @@ def a3_model():
         "pages": ["title", "slug", "available", "template", "holaSample"],
         "inquiries": ["form", "trip", "interests", "adults", "name", "email", "consent_at", "lang", "page_url",
                       "utm", "gclid", "fbclid", "landing", "status", "tracked", "ip_hash", "holaSample"],
-        "media": ["alt", "holaSample"],
-        "users": ["role"],
+        "images": ["path", "alt", "width", "height", "holaSample"],
+        "users": ["email", "password_hash", "role", "session_version"],
         "durations": tax, "trip-styles": tax, "cruise-types": tax, "departures": tax + ["destination"],
         "regions": tax, "guide-topics": tax,
     }
@@ -533,7 +571,7 @@ def a3_model():
 def a4_i18n():
     schema = STATE.get("schema") or {}
     check(schema.get("locales") == ["es", "en"] and schema.get("defaultLocale") == "es", "A4",
-          "Payload locales es (default) + en",
+          "locales es (default) + en",
           f"locales {schema.get('locales')!r}, default {schema.get('defaultLocale')!r}")
     if not STATE.get("cookie"):
         rec("FAIL", "A4", "no preview cookie; cannot fetch pages")
@@ -591,7 +629,7 @@ def page_checks(group, lang, path, index, r):
         if group != "home":
             need.add("BreadcrumbList")
         if group == "single":
-            for base, kind in PAYLOAD_TRIP_BASES.items():
+            for base, kind in TRIP_BASES.items():
                 if path.startswith(base) and base not in ("/", "/en/"):
                     need.add("TouristTrip")
             if path.startswith(DEST_BASES):
@@ -610,7 +648,7 @@ def page_checks(group, lang, path, index, r):
     head_dl = any(s["in_head"] and not s["attrs"].get("src") and "dataLayer" in s["text"] for s in p.scripts)
     if not head_dl:
         probs.append("no inline dataLayer bootstrap in <head>")
-    if group == "single" and any(path.startswith(b) for b in PAYLOAD_TRIP_BASES if b not in ("/", "/en/")):
+    if group == "single" and any(path.startswith(b) for b in TRIP_BASES if b not in ("/", "/en/")):
         if "view_item" not in t:
             probs.append("no view_item on a trip page")
     first_a = p.anchors[0] if p.anchors else {}
@@ -850,10 +888,10 @@ def a11_samples():
         v = c.get(k, {})
         check(v.get("es") == n and v.get("en") == n, "A11", f"{k}: {n} es / {n} en",
               f"{k}: es={v.get('es')} en={v.get('en')} (expected {n}/{n})")
-    check((c.get("media") or 0) >= 30, "A11", f"{c.get('media')} sample images (≥ 30)", f"only {c.get('media')} sample images")
+    check((c.get("images") or 0) >= 30, "A11", f"{c.get('images')} sample images (≥ 30)", f"only {c.get('images')} sample images")
     d = hola_json("samples delete --dry-run")
     wd = (d or {}).get("would_delete", {})
-    check(d is not None and wd.get("tours", 0) >= 3 and wd.get("media", 0) >= 30, "A11",
+    check(d is not None and wd.get("tours", 0) >= 3 and wd.get("images", 0) >= 30, "A11",
           "samples delete --dry-run reports what it would delete", f"dry run output: {json.dumps(d)[:160]}")
     c2 = hola_json("samples count")
     check(c2 == c, "A11", "dry run changed nothing", "sample counts changed after --dry-run")
@@ -887,16 +925,21 @@ def a12_security():
                 marker = lines[0][:60] if lines else ""
             leaked = r.status == 200 and ((marker and marker in r.text) or "text/html" not in (r.h("Content-Type") or ""))
             check(not leaked, "A12", f"{path} not served (final {r.status})", f"{path} is served from the kit")
-    for path in ("/api/users", "/api/inquiries"):
+    for path in ("/api/users", "/api/inquiries", "/api/tours", "/api/graphql"):
         r = http(path)
-        check(r.status in (401, 403), "A12", f"logged-out GET {path} refused ({r.status})",
-              f"logged-out GET {path} answered {r.status}")
+        check(r.status == 404, "A12", f"no JSON API at {path} (404)", f"GET {path} answered {r.status} (expected 404)")
+    for ck in (None, {"hola_session": "garbage"}):
+        r = http("/admin/inquiries", cookies=ck)
+        loc = r.h("Location") or ""
+        check(r.status in (302, 303, 307) and "/admin/login" in loc, "A12",
+              f"/admin/inquiries without a valid session redirects to login{' (garbage cookie)' if ck else ''}",
+              f"/admin/inquiries without a valid session answered {r.status} → {loc!r}")
     code, _, _ = run("git ls-files --error-unmatch .env.local")
     check(code != 0, "A12", ".env.local is not tracked", ".env.local is tracked by git")
     code, _, _ = run("git check-ignore -q .env.local")
     check(code == 0, "A12", ".env.local is gitignored", ".env.local is not gitignored")
     leaks = 0
-    for k in ("PAYLOAD_SECRET", "HOLA_PREVIEW_KEY", "DATABASE_URI", "SMTP_PASS", "TURNSTILE_SECRET_KEY", "HOLA_WEBHOOK_SECRET"):
+    for k in ("APP_SECRET", "HOLA_PREVIEW_KEY", "DATABASE_URL", "SMTP_PASS", "TURNSTILE_SECRET_KEY", "HOLA_WEBHOOK_SECRET"):
         v = ENV.get(k, "")
         if len(v) >= 8:
             p = subprocess.run(["git", "grep", "-F", "-q", "-e", v, "HEAD", "--"], cwd=ROOT, capture_output=True)
@@ -967,17 +1010,19 @@ def a15_git():
     dirty = [l for l in out.splitlines() if l[3:] not in ("kit/BUILD-LOG.md", "kit/BUILD-REPORT.md")]
     check(code == 0 and not dirty, "A15", "working tree clean (except BUILD-LOG / BUILD-REPORT)",
           f"uncommitted changes: {', '.join(l[3:] for l in dirty[:6])}")
-    code, out, _ = run("git ls-files src/migrations")
-    check(code == 0 and out.strip(), "A15", "migrations committed", "src/migrations not committed")
+    code, out, _ = run("git ls-files drizzle")
+    check(code == 0 and ".sql" in out, "A15", "drizzle/ migrations committed", "drizzle/ migrations not committed")
+    code, _, _ = run("git ls-files --error-unmatch .env.hostinger.local")
+    check(code != 0, "A15", ".env.hostinger.local is not tracked", ".env.hostinger.local is tracked by git")
     ex = read_env(os.path.join(ROOT, ".env.example"))
-    names = ["DATABASE_URI", "PAYLOAD_SECRET", "NEXT_PUBLIC_SITE_URL", "HOLA_COMING_SOON", "HOLA_PREVIEW_KEY",
+    names = ["DATABASE_URL", "APP_SECRET", "SITE_URL", "HOLA_COMING_SOON", "HOLA_PREVIEW_KEY", "HOLA_AUTO_MIGRATE",
              "HOLA_DEV_MODE", "ADMIN_EMAIL", "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_FROM",
              "TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY", "N8N_WEBHOOK_URL", "HOLA_WEBHOOK_SECRET", "HOLA_MAIL_LOG"]
     if ex is None:
         rec("FAIL", "A15", ".env.example missing")
     else:
         miss = [k for k in names if k not in ex]
-        secret_vals = [k for k in ("DATABASE_URI", "PAYLOAD_SECRET", "HOLA_PREVIEW_KEY", "SMTP_PASS",
+        secret_vals = [k for k in ("DATABASE_URL", "APP_SECRET", "HOLA_PREVIEW_KEY", "SMTP_PASS",
                                    "TURNSTILE_SECRET_KEY", "HOLA_WEBHOOK_SECRET") if ex.get(k)]
         check(not miss and not secret_vals, "A15", ".env.example lists every key with no secret values",
               f".env.example: missing {miss}, non-empty secrets {secret_vals}")
@@ -999,12 +1044,40 @@ def a16_owner_inputs():
         rec("PASS" if ENV.get(k) else "BLOCKED", "A16", f"{label} ({k}) {'set' if ENV.get(k) else 'empty — owner input'}")
 
 
+def a17_hostinger():
+    cfg = None
+    for f in ("next.config.ts", "next.config.mjs", "next.config.js", "next.config.mts"):
+        if os.path.isfile(os.path.join(ROOT, f)):
+            cfg = f
+            break
+    if not cfg:
+        rec("FAIL", "A17", "no next.config.(ts|mjs|js|mts)")
+        return
+    t = open(os.path.join(ROOT, cfg), encoding="utf-8", errors="ignore").read()
+    fn = re.search(r"export\s+default\s+(async\s+)?(function|\(|async)", t) or "module.exports = function" in t \
+        or re.search(r"export\s+default\s+\w+\s*=>", t)
+    check(not fn, "A17", f"{cfg} exports a plain object (Hostinger drops function configs)",
+          f"{cfg} seems to export a function")
+    check("outputFileTracingIncludes" in t and "drizzle" in t, "A17", "migrations traced into the standalone output",
+          f"{cfg} lacks outputFileTracingIncludes for drizzle/")
+    inst = os.path.join(ROOT, "src", "instrumentation.ts")
+    it = open(inst, encoding="utf-8", errors="ignore").read() if os.path.isfile(inst) else ""
+    check("HOLA_AUTO_MIGRATE" in it and "NEXT_RUNTIME" in it, "A17", "startup migration guarded by HOLA_AUTO_MIGRATE",
+          "src/instrumentation.ts does not run the guarded startup migration")
+    d = hola_json("deploy-check")
+    check(isinstance(d, dict) and d.get("ok") is True, "A17", "`pnpm hola:deploy-check` passes locally",
+          f"`pnpm hola:deploy-check` output: {json.dumps(d)[:200] if d is not None else 'no JSON'}")
+    h = hola_json("health") or {}
+    check(h.get("db") is True and h.get("version"), "A17", f"database answers (version {h.get('version')})",
+          "`pnpm hola:health` did not report db:true with a version")
+
+
 def main():
     started = datetime.datetime.now()
     print(f"Hola Egipto acceptance — {started:%Y-%m-%d %H:%M} — {BASE}{' — PREFLIGHT' if PREFLIGHT else ''}")
     steps = [a0_environment, a1_structure, a2_gates, a5_coming_soon, a6_preview_and_session, a3_model, a4_i18n,
              a7_urls, a8_inquiry, a9_thanks, a10_whatsapp, a11_samples, a12_security, a13_performance, a14_logs,
-             a15_git, a16_owner_inputs]
+             a15_git, a16_owner_inputs, a17_hostinger]
     for fn in steps:
         cid = "A" + re.match(r"a(\d+)", fn.__name__).group(1)
         try:

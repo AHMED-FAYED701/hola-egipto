@@ -1,6 +1,6 @@
 # Content rules — samples, copy and what must never be invented
 
-Every sample document and sample image has `holaSample: true`. The site is behind the coming-soon page, and the owner replaces samples with real content before launch. Launch terms (contracts §4), fixed pages and `site-settings` defaults are real data, not samples.
+Every sample row (content items and image-library rows) has `holaSample` true. The site is behind the coming-soon page, and the owner replaces samples with real content before launch. Launch terms (contracts §4), fixed pages and `site-settings` defaults are real data, not samples.
 
 ## §1 Voice
 
@@ -15,7 +15,7 @@ Write each language natively. The English is not a word-for-word translation of 
 
 ## §2 The sample set
 
-Each sample is **one** document with both languages filled and `available: true` in `es` and `en`.
+Each sample is **one** item (main row + an `es` and an `en` `_i18n` row) with both languages filled and `available` true in both.
 
 | Collection | Count | Items |
 | --- | --- | --- |
@@ -24,9 +24,9 @@ Each sample is **one** document with both languages filled and `available: true`
 | `excursions` | 4 | **Luxor en un día desde Hurghada** (Hurghada, 14 h) · **Snorkel en las islas Giftun desde Hurghada** (Hurghada, 7 h) · **Snorkel en Abu Dabbab desde Marsa Alam** (Marsa Alam, 6 h) · **Pirámides de Guiza y la Esfinge desde El Cairo** (El Cairo, 8 h) |
 | `destinations` | 6 | El Cairo y Guiza (El Cairo y el Norte) · Luxor · Asuán · Abu Simbel (Alto Egipto) · Hurghada · Marsa Alam (Mar Rojo) |
 | `guides` | 3 | **Cuándo viajar a Egipto: el tiempo mes a mes** (Planificar el viaje) · **Qué ver en Luxor en dos días** (Qué ver) · **Snorkel en el Mar Rojo: lo que conviene saber** (Mar Rojo y buceo) |
-| `media` | ≥ 30 | branded placeholders (§4) |
+| `images` | ≥ 30 | branded placeholders (§4) |
 
-So `pnpm -s hola:samples count` must report `tours` 3/3, `cruises` 2/2, `excursions` 4/4, `destinations` 6/6, `guides` 3/3 (es/en) and `media` ≥ 30.
+So `pnpm -s hola:samples count` must report `tours` 3/3, `cruises` 2/2, `excursions` 4/4, `destinations` 6/6, `guides` 3/3 (es/en) and `images` ≥ 30.
 
 **English titles:** natural equivalents, e.g. *Classic Egypt in 8 days: Cairo, the Nile and Abu Simbel*. **Slugs:** natural per language (e.g. `egipto-clasico-8-dias` / `classic-egypt-8-days`), never a numeric suffix.
 
@@ -58,7 +58,7 @@ Placeholder format: `[pendiente]` / `[pending]`, rendered with a dashed `terraco
 
 ## §4 Placeholder images
 
-There are no real photos, and nothing may be downloaded from the web. `pnpm hola:placeholders` generates JPEGs (quality 82) with `sharp` from an SVG composed in code:
+There are no real photos, and nothing may be downloaded from the web. `pnpm hola:placeholders` generates **WebP** files (quality 75) with `sharp` (devDependency) from an SVG composed in code, into `public/images/samples/` (committed; keep the folder ≤ 20 MB). The v2 placeholders in the old `media/` folder are not reused (it is gitignored); regenerate them.
 
 - **Background:** the `deep` or `teal` pattern tile from `kit/brand/03-pattern/` at 2× scale, tiled.
 - **Overlay:** a centred `papyrus` label block:
@@ -66,11 +66,11 @@ There are no real photos, and nothing may be downloaded from the web. `pnpm hola
     - the subject on a second line, e.g. `Luxor · Templo de Karnak`
 - **Font:** text in the SVG uses a generic `sans-serif` family (sharp renders it with the system fonts), or text outlined with any available tool. Do not depend on Google Fonts.
 - **Sizes:**
-    - hero 2400×1350
-    - card 1600×1200 (4:3)
-    - tile 1200×1600 (3:4)
-    - gallery 2000×1333
-- **Alt text** (localized `alt` on the media document): `Foto de muestra: Templo de Karnak, Luxor` / `Sample photo: Karnak Temple, Luxor`.
+    - hero 1920×1080
+    - card 1200×900 (4:3)
+    - tile 900×1200 (3:4)
+    - gallery 1600×1067
+- **Alt text** (`alt_es` / `alt_en` on the image-library row): `Foto de muestra: Templo de Karnak, Luxor` / `Sample photo: Karnak Temple, Luxor`.
 
 They must never look like real photos.
 
@@ -104,6 +104,6 @@ They must never look like real photos.
 ## §6 Fixed pages
 
 - **About:** story `[pendiente]`, a team block with 3 placeholder members (pattern as photo, "Nombre pendiente"), "How we work" in 3 steps (draft), and a licence line `[pendiente]`.
-- **Contact:** contact methods read from `site-settings`. An empty field shows `[pendiente]` only to a logged-in admin and is hidden for everyone else (preview-cookie visitors count as everyone else).
+- **Contact:** contact methods read from `site-settings`. An empty field is hidden on the site (the admin's Settings screen shows which ones are empty).
 - **FAQ:** 4 groups × 3 questions (before booking, payments, during the trip, cancellations). General planning questions with answers that make no guarantees.
-- **Legal pages:** headings from spec "Legal". Body text is `[Texto legal pendiente: lo aporta el propietario]` / `[Legal text pending: supplied by the owner]`. The cookie policy also lists the site's own cookies (`hola_consent`, `hola_preview`, `payload-token`).
+- **Legal pages:** headings from spec "Legal". Body text is `[Texto legal pendiente: lo aporta el propietario]` / `[Legal text pending: supplied by the owner]`. The cookie policy also lists the site's own cookies (`hola_consent`, `hola_preview`, `hola_session`, `hola_admin_lang`).

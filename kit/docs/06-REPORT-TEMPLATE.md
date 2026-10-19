@@ -12,9 +12,9 @@ Three to five sentences:
 
 ## How to review
 
-- **Start the site:** `sudo service postgresql start`, then `pnpm build && pnpm start` (or `pnpm dev`) in `~/hola-egipto`.
+- **Start the site:** `sudo service mariadb start`, then `pnpm build && pnpm start` (or `pnpm dev`) in `~/hola-egipto`.
 - **Preview link:** run `pnpm -s hola:preview-url` and open the link it prints. It shows the real site in that browser for 30 days.
-- **Admin:** open `/admin`; the first visit asks you to create your admin account.
+- **Admin:** run `pnpm -s hola:setup-url`, open the link once to create your admin account, then log in at `/admin`.
 - **Pages to start with:** Home ES/EN, one tour, the tours archive, one destination, one guide, Plan my trip.
 - **Samples:** every trip, destination, guide and image is a flagged sample. Remove them all with `pnpm hola:samples delete`.
 
@@ -23,8 +23,8 @@ Three to five sentences:
 | Item | Value |
 | --- | --- |
 | Node / pnpm | |
-| Next.js / Payload / React / next-intl | |
-| Postgres | |
+| Next.js / React / next-intl / drizzle-orm / mysql2 | |
+| MySQL / MariaDB (`SELECT VERSION()`) | |
 
 ## What was built (by spec section)
 
@@ -49,7 +49,7 @@ One row per BLOCKED check or missing input, with exactly where to set it:
 | WhatsApp Business number | Every WhatsApp button is hidden until it is set | Admin › Ajustes › Site settings › `whatsapp_number` |
 | … | | |
 
-Also list the deployment items that are out of scope for this run (hosting, domain, HTTPS/HSTS, SMTP DNS records, Cloudflare/Turnstile, GTM/GA4/Ads/Meta, 2FA for admins, backups, 301 redirects, the retention schedule).
+Then point to `kit/docs/07-DEPLOY-HOSTINGER.md` for the deployment steps, and list what is still open after deployment (Turnstile, GTM/GA4/Ads/Meta, SMTP DNS records, admin 2FA, backups, 301 redirects, retention).
 
 ## Draft copy to review
 
@@ -75,7 +75,8 @@ Any bug fixed in `kit/bin/acceptance.py` / `acceptance.sh`: what changed and why
 ## Rollback
 
 - **Code:** `git log --oneline`, then `git revert <hash>`.
-- **Database:** `pnpm payload migrate:down` steps back one migration; `pnpm hola:samples delete` removes all samples.
+- **Back to v2:** `git checkout v2-payload` (Payload + Postgres) — the old Postgres database was left untouched.
+- **Samples:** `pnpm hola:samples delete` removes all sample rows.
 
 ## Suggested next runs
 

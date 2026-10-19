@@ -1,15 +1,16 @@
-/goal Build the complete Hola Egipto website in this repository exactly as kit/START-HERE.md describes, following kit/docs/02-BUILD-PLAN.md from S0 to S13 in order, with one commit per step ("S<n>: <name>") and a kit/BUILD-LOG.md entry per step. Do not ask questions; when something is unclear, take the spec default, log it and continue.
+/goal Move the Hola Egipto site in this repository from Payload CMS + Postgres to Drizzle ORM + MySQL with a custom admin, ready for Hostinger, exactly as kit/START-HERE.md describes, following kit/docs/02-BUILD-PLAN.md from M0 to M10 in order, with one commit per step ("M<n>: <name>") and a kit/BUILD-LOG.md entry per step. Do not ask questions; when something is unclear, take the spec default, log it and continue.
 
-The goal is met only when all of the following have been shown in this conversation, in this order, after the final commit:
-1. The production build is running: `pnpm build` succeeded and `pnpm start` is serving http://localhost:3000 (output appended to kit/logs/server.log).
-2. The full output of `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt`, whose last line reads `ACCEPTANCE SUMMARY: pass=<n> fail=0 warn=<n> blocked=<n>`.
-3. kit/BUILD-REPORT.md is written from kit/docs/06-REPORT-TEMPLATE.md and committed, and its "Summary" and "Needs you" sections are printed.
-4. `git status --porcelain` prints nothing, and `git log --oneline | head -20` is printed.
+The goal is met only when all of the following have been shown in this conversation, in this order, after the last commit that changes code (only kit/BUILD-REPORT.md and kit/BUILD-LOG.md may be committed after the acceptance run, without re-running it):
+1. `DATABASE_URL=mysql://x:x@127.0.0.1:1/x pnpm build` exited 0 (the build needs no database).
+2. The production build is running: `pnpm build` succeeded and `pnpm start` is serving http://localhost:3000 (output appended to kit/logs/server.log).
+3. The full output of `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt`, whose last line reads `ACCEPTANCE SUMMARY: pass=<n> fail=0 warn=<n> blocked=<n>`.
+4. kit/BUILD-REPORT.md is rewritten for v3 from kit/docs/06-REPORT-TEMPLATE.md and committed, and its "Summary" and "Needs you" sections are printed.
+5. `git status --porcelain` prints nothing, and `git log --oneline | head -15` is printed.
 
 Constraints that must hold the whole way:
 - Never weaken, skip or delete a check in kit/bin/acceptance.py or kit/bin/acceptance.sh to make it pass; fix the app. A genuine script bug may be fixed only if it is listed under "Script changes" in the report.
-- Never print, cat, echo, copy or commit .env.local or any secret value, and never rewrite DATABASE_URI.
-- Work only inside this repository and its database; no sudo, no remote git, no deployment, no web image downloads, no permanent user accounts.
+- Never print, cat, echo, copy or commit .env.local, .env.hostinger.local or any secret value, and never rewrite DATABASE_URL.
+- Work only inside this repository and its local MySQL database; never connect to the production database, never git push, no sudo, no web image downloads, no permanent user accounts.
 - A failing acceptance check is not a reason to stop: fix it, commit, rebuild, restart and re-run.
 
-The goal is impossible only if Node, pnpm or the database in DATABASE_URI cannot be reached; in that case write kit/BUILD-REPORT.md saying exactly what is needed, print it, and stop.
+The goal is impossible only if Node, pnpm or the MySQL database in DATABASE_URL cannot be reached; in that case write kit/BUILD-REPORT.md saying exactly what is needed, print it, and stop.

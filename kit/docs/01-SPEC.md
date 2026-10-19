@@ -2,7 +2,7 @@
 
 Oct 6, 2026 · @Ahmed Fayed
 
-> **Kit note (Next.js edition, 18 Oct 2026):** this is the spec as agreed on 6 Oct 2026, written for WordPress. The build is now **Next.js + Payload CMS**. `kit/START-HERE.md` ("Translating the spec") and `kit/docs/02`–`05` override this file wherever they differ: file names such as `single-tour.php`, plugins (Polylang, Yoast, Complianz, LiteSpeed, WP Mail SMTP, Redirection, Two Factor, UpdraftPlus), WP-CLI, `wp-content`, hosting, Cloudflare and backups. What the site **is** (pages, URLs, content model, sections, SEO, tracking, budgets, legal) still comes from here. All decisions in the table below are agreed; build on the Recommended column.
+> **Kit note (Next.js edition, 18 Oct 2026):** this is the spec as agreed on 6 Oct 2026, written for WordPress. The build is now **Next.js + MySQL (Drizzle) with a custom admin**, hosted on Hostinger. `kit/START-HERE.md` and `kit/docs/02`–`07` override this file wherever they differ: file names such as `single-tour.php`, plugins (Polylang, Yoast, Complianz, LiteSpeed, WP Mail SMTP, Redirection, Two Factor, UpdraftPlus), WP-CLI, `wp-content`, hosting, Cloudflare and backups. What the site **is** (pages, URLs, content model, sections, SEO, tracking, budgets, legal) still comes from here. All decisions in the table below are agreed; build on the Recommended column.
 
 ## Summary and scope
 

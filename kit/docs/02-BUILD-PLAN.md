@@ -1,163 +1,97 @@
-# Build plan — S0 to S13 (Next.js + Payload)
+# Build plan v3 — M0 to M10 (Payload/Postgres → Drizzle/MySQL + custom admin)
 
-Work through the steps in order. S0 is log-only (no commit; git starts in S1). After each step from S1 on:
+Work through the steps in order. After each step: `pnpm lint`, `pnpm typecheck` and `pnpm build` pass; append to `kit/BUILD-LOG.md`; **then** commit `M<n>: <name>` (log included); print `STEP M<n> DONE — <one-line summary>`.
 
-1. `pnpm lint`, `pnpm typecheck` and `pnpm build` pass (from S1 on).
-2. Commit `S<n>: <name>`.
-3. Append to `kit/BUILD-LOG.md`: time, step, what changed, anything defaulted, `DONE`.
-4. Print `STEP S<n> DONE — <one-line summary>`.
-
-**Running the server.** Whenever a step needs the running site, use the production build: `pnpm build`, then `pnpm start` in the background with output appended to `kit/logs/server.log`, wait until `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/robots.txt` answers `200`, and stop it again before the next `pnpm build`. Use `pnpm dev` only for quick checks.
+**Never** name an env file `.env.production.local` or `.env.production` (Next loads them automatically). Never pass `envv` output to `curl -v` or anything that echoes it.
 
 **Reading a value from `.env.local`** (strips optional quotes; never echo the result): `envv() { sed -nE "s/^$1=[\"']?([^\"']*)[\"']?\$/\1/p" .env.local; }`.
 
-**Checking a page.** Get the preview cookie once per session with `curl -s -c kit/logs/he.jar -o /dev/null "http://localhost:3000/?hola_preview=$(envv HOLA_PREVIEW_KEY)"`, then fetch pages with `-b kit/logs/he.jar`.
+**Running the server:** stop any server you started; check port 3000 is free (`ss -ltn | grep -q ':3000 '`); `pnpm build`; `pnpm start` in the background with output appended to `kit/logs/server.log`; wait until `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/robots.txt` answers `200`.
 
-**Port 3000:** before `pnpm start`, check nothing else listens there (`ss -ltn | grep -q ':3000 '`); if something does and it is not this app, stop and log it instead of crawling another app.
+**Checking a page:** `curl -s -c kit/logs/he.jar -o /dev/null "http://localhost:3000/?hola_preview=$(envv HOLA_PREVIEW_KEY)"`, then fetch pages with `-b kit/logs/he.jar`.
 
-## S0 · Preflight (no app code yet)
+## M0 · Preflight and baseline
 
-1. Confirm the layout: you are in the repository root; `kit/START-HERE.md` exists; `.env.local` exists. Check `.env.local` contains `DATABASE_URI` **without printing the file** (`grep -c '^DATABASE_URI=' .env.local`).
-2. Versions: `node -v` (≥ 22), `pnpm -v`, `psql --version`, `git --version`, `python3 --version`. Record them in `BUILD-LOG.md`.
-3. Database (never let the password reach the transcript): `DBURI=$(sed -nE "s/^DATABASE_URI=[\"']?([^\"']*)[\"']?\$/\1/p" .env.local); psql "$DBURI" -tAc 'select 1' 2>&1 | sed -E 's#//[^@]*@#//***@#'` prints `1`. If it fails, check that Postgres is running (`pg_isready`); if it still fails, stop and write `kit/BUILD-REPORT.md` saying what is needed (START-HERE "When stuck").
-4. If the folder is a git repo with commits already, this is a resumed run: follow START-HERE "Resumed run".
-5. Run `bash kit/bin/acceptance.sh --preflight` once. It must run to the end and print an `ACCEPTANCE SUMMARY` line (most checks fail now; that is expected). If the script itself crashes, fix the cause and log it.
+1. `git status --porcelain` is empty (commit or stash nothing of the owner's; if dirty with your own files from a crashed run, log and continue). Tag the v2 state once: `git rev-parse -q --verify refs/tags/v2-payload >/dev/null || git tag v2-payload` (never move the tag).
+2. Versions: node, pnpm, `mariadb --version` (or `mysql --version`). Record them.
+3. `.env.local` has `DATABASE_URL` (check with `grep -c '^DATABASE_URL=' .env.local`, never print). Connect with a one-off `node -e` + `mysql2` snippet that reads the URL from the env file and prints only `SELECT VERSION()`; on failure print only the error code (e.g. `ER_ACCESS_DENIED_ERROR`, `ECONNREFUSED`). If it fails, stop and write `kit/BUILD-REPORT.md` saying what is needed.
+4. Baseline for comparison: with the v2 app still running on Postgres, save `pnpm -s hola:urls` to `kit/logs/v2-urls.tsv` and the HTML of 6 pages (home ES/EN, one tour, tours archive, one guide, plan my trip) to `kit/logs/v2-pages/`. If the v2 app can no longer start, log it and skip the baseline.
+5. **Stop the v2 server**, then run `bash kit/bin/acceptance.sh --preflight`; it must reach its summary line (failures are expected). (With the v2 server up it would write test data into the old Postgres database.)
 
-**Done when:** versions and DB check are in the log and the preflight run printed its summary. (No commit for S0.)
+**Done when:** versions, DB check and baseline are logged. (No commit for M0 except the tag.)
 
-## S1 · Foundation
+## M1 · Environment and dependencies
 
-1. **Scaffold** with this exact command (no prompts; the dummy connection string is replaced later, never pass the real URI on the command line):
-   ```
-   mkdir -p .scaffold && cd .scaffold && pnpm dlx create-payload-app@3 --name app --template blank --db postgres --db-connection-string postgres://x:x@127.0.0.1:5432/x --use-pnpm --no-agent --no-git
-   ```
-   If a flag is rejected by the installed version, run `pnpm dlx create-payload-app@3 --help` and use its equivalent non-interactive flags. Move the contents of `.scaffold/app/` into the repository root (never overwrite `.env.local` or anything in `kit/`), then delete `.scaffold/`. After moving:
-   - delete the scaffold's `.env`, `Dockerfile` and `docker-compose.yml` (local only, no Docker);
-   - use `DATABASE_URI` (not `DATABASE_URL`) in `payload.config.ts`;
-   - rename `src/app/(payload)/custom.scss` to `custom.css` and update its import (no Sass);
-   - delete the scaffold's `src/app/(frontend)/page.tsx` and `layout.tsx` (they clash with `[locale]`);
-   - set `pnpm.onlyBuiltDependencies` in `package.json` (e.g. `sharp`, `esbuild`) and never run the interactive `pnpm approve-builds`.
+1. `.env.local`, without printing values, each guarded by `grep -q '^KEY=' .env.local ||` so a rerun never duplicates: **add** `APP_SECRET` with the same value as `PAYLOAD_SECRET` (`sed -n 's/^PAYLOAD_SECRET=/APP_SECRET=/p' .env.local >> .env.local`, or `openssl rand -hex 32` if there is none), `SITE_URL` from `NEXT_PUBLIC_SITE_URL` the same way (else `SITE_URL=http://localhost:3000`), `HOLA_PREVIEW_KEY` (`openssl rand -hex 16`) if absent, `HOLA_AUTO_MIGRATE=0`. The old keys (`DATABASE_URI`, `PAYLOAD_SECRET`, `NEXT_PUBLIC_SITE_URL`) stay until M4 so the v2 code keeps building. Rewrite `.env.example` from contracts §2.
+2. **Add** `drizzle-orm`, `mysql2`, `bcryptjs`, `jose`, `zod`, `nodemailer`, `marked`, `sanitize-html`; dev: `drizzle-kit`, `tsx`, `@types/*` as needed. Move `sharp` to devDependencies if it is a dependency. Do **not** remove Payload yet: old and new code live side by side until M4.
 
-   Versions: `@payloadcms/next` 3.9x requires `next >=16.3.3 <17`; at kit time the current releases were Next 16.4.x, Payload 3.91.x, next-intl 4.14.x. Use the latest Payload 3.x and the Next/React versions it requires; record exact versions of `next`, `payload`, `@payloadcms/*`, `react`, `next-intl`, `sharp`, `jose` in the log.
-2. **Environment:** append to `.env.local` the keys of contracts §2 that are missing (`PAYLOAD_SECRET`, `HOLA_PREVIEW_KEY` generated with `openssl rand` without printing; `NEXT_PUBLIC_SITE_URL=http://localhost:3000`, `HOLA_COMING_SOON=1`, `HOLA_DEV_MODE=1`, `HOLA_MAIL_LOG=kit/logs/mail.log`, and the empty owner keys). Write `.env.example` from contracts §2 with empty values.
-3. **Repository:** `git init` (if needed), `.gitignore` per contracts §14, `package.json` scripts per contracts §1 (`typecheck` = `tsc --noEmit`, `migrate` = `payload migrate`), ESLint working, TypeScript `strict: true`.
-4. **Payload:** `postgresAdapter({ pool: { connectionString: process.env.DATABASE_URI }, push: false, disableCreateDatabase: true })` from the first commit (dev schema push would make `migrate` and the `hola:*` scripts stop at interactive prompts). `users` collection with `role`, localization `es` (default) + `en` with `fallback: false`, admin at `/admin`. Create migrations with `pnpm payload migrate:create <name> --skip-empty`, apply with `pnpm migrate`, confirm with `pnpm payload migrate:status`.
-5. **Config:** `poweredByHeader: false`, `trailingSlash: true` + `skipTrailingSlashRedirect: true` (contracts §5), `htmlLimitedBots: /.*/` (metadata blocks rendering, so `notFound()` gives a real 404), `images.localPatterns` (contracts §13).
-6. Create `kit/logs/`.
+**Done when:** install succeeds; the v2 site still builds; `.env.example` matches contracts §2.
 
-**Done when:** `pnpm build` passes, `pnpm start` serves `/admin` (200 or a redirect to the first-user screen), `/api/users` answers without a redirect, and `pnpm payload migrate:status` shows the migration applied.
+## M2 · Schema and migrations
 
-## S2 · Coming-soon page, preview bypass, headers
+1. `src/db/schema.ts` for every entity, `_i18n` table, join table, settings, navigation, images, inquiries, users, `login_attempts` per contracts §4, §7, §13, §18. Use the `jsonText` custom type for lists.
+2. `src/db/client.ts`: one `mysql2/promise` pool from `DATABASE_URL` (connectionLimit 5, `charset: 'utf8mb4'`), cached on `globalThis` in dev; Drizzle on top.
+3. `drizzle.config.ts` (dialect `mysql`, schema path, out `drizzle`). Generate the first migration with `pnpm db:generate`. Inspect the SQL: no `json` columns, no CHECK, no TEXT defaults. (utf8mb4 comes from the database default; `hola:deploy-check` verifies table collations.)
+4. `pnpm migrate` script and `src/instrumentation.ts` startup migration, both using the procedure in contracts §19.
+5. `src/db/model.ts` + `hola:schema` and `hola:health` (contracts §9).
 
-1. `src/proxy.ts` (Next ≥ 16) or `src/middleware.ts` exactly per contracts §3, including JWT verification of `payload-token` (with the derived key in §3) and the preview cookie HMAC, plus the front-end trailing-slash 308 of contracts §5.
-2. The coming-soon HTML per contracts §3 (inline the stacked colour logo SVG from `kit/brand/01-logo/svg/`).
-3. Security headers per contracts §11 in `next.config` `headers()`.
+**Done when:** `pnpm -s migrate` prints `{"applied":1}` (or more) on the empty local database, a second run prints `{"applied":0}`, and `pnpm -s hola:schema` exits 0 with every field A3 expects.
 
-**Done when:** a visitor gets 503 with the three headers; `payload-token=garbage` still gets 503; the preview link sets the cookie and the cookie gets past; `/admin`, `/api/…`, `/robots.txt` and `/favicon.ico` are not intercepted.
+## M3 · Data layer
 
-## S3 · Content model
+1. `src/lib/content/*.ts`: typed read functions for every page type (by slug and locale, lists with the archive filters/sort/pagination of contracts §5, reverse lookups, search, sitemap, URL list), and write functions used by the admin and scripts (create/update/delete per entity, including the `duration` auto-assignment and `i18n` upserts).
+2. Replace every Payload Local API call in pages, layouts, metadata, sitemap, route handlers and components with these functions. Same props, same output.
+3. Pages: no database access at build (contracts §16).
 
-1. Collections, taxonomy collections and globals exactly per contracts §4 and spec §5, field names verbatim, localized vs shared per the rule in contracts §4.
-2. Admin labels in Spanish and English (Payload `i18n` for the admin: `es`, `en`). Group the admin nav: Viajes, Contenido, Taxonomías, Solicitudes, Ajustes.
-3. `tours` `beforeChange` hook: set `duration` from `duration_days` using the fixed slugs (contracts §4).
-4. Validation from the spec: `subtitle` ≤ 90, `highlights` 3–8, `related_trips` ≤ 3, `alt` required on media, both prices required when `available` is true in any locale.
-5. Access: public read on content collections, taxonomies, media and globals; `inquiries` and `users` admin-only; create/update/delete for logged-in users only.
-6. Lexical editor with the blocks `trip-card` (relationship to a trip) and `tip-box` (localized text) for guides.
-7. `media` per contracts §13.
-8. Revalidation hooks per contracts §16 (safe outside Next).
-9. Generate types, create a migration, run it.
+**Done when:** every page, layout, metadata function, sitemap and route handler reads through `src/lib/content/*` (no Payload Local API calls left outside the old Payload files), and `pnpm build` succeeds **with** and **without** a reachable MySQL database (`DATABASE_URL=mysql://x:x@127.0.0.1:1/x pnpm build`). If the v2 Payload config still needs Postgres at build time, keep it out of the import graph of the front end so the no-DB build passes.
 
-**Done when:** `pnpm -s hola:schema` (write it now, §9) lists every collection, global and field the acceptance script expects (A3), and the migration ran.
+## M4 · Scripts, images and seed
 
-## S4 · Internationalised routing
+1. Rewrite every `hola:*` script on the data layer (contracts §9), including `hola:setup-url`, `hola:deploy-check`, `--env=hostinger` support.
+2. `hola:placeholders` → `public/images/samples/` (content rules §4); image library rows created by `hola:seed`.
+3. Port the v2 sample content and launch data (terms, pages, settings, navigation) into `hola:seed` / `hola:samples create`, reusing the v2 data files (from the working tree or `git show v2-payload:<path>`). Convert rich text to Markdown with the guide shortcodes.
+4. Remove Payload: the `payload`, `@payloadcms/*`, `graphql`, `pg` dependencies, `src/payload.config.ts`, the `(payload)` routes, collections/globals, `src/migrations/`, `payload-types.ts`, `media/` usage. Then delete the obsolete `.env.local` lines without printing (`sed -i '/^DATABASE_URI=/d; /^PAYLOAD_SECRET=/d; /^NEXT_PUBLIC_SITE_URL=/d' .env.local`). The v2 code stays available through the `v2-payload` tag.
 
-1. `next-intl` with `localePrefix: 'as-needed'`, `localeDetection: false`, and the `pathnames` table of contracts §5. Integrate its handling into the same `proxy.ts`/`middleware.ts` after the coming-soon logic (coming-soon wins).
-2. Route files under `src/app/(frontend)/[locale]/…` for every internal pathname, a `[page]` route for fixed pages, `search`, and a catch-all that calls `notFound()` with a localized `not-found.tsx` (status 404). Call `notFound()` in the page component before any Suspense boundary, and add no `loading.tsx` under `[locale]` (a streamed 200 cannot become a 404).
-3. URL helpers in `src/lib/urls.ts` that build the localized URL of any document and of its other-language version (or `null` when not available).
-4. Messages files `src/messages/es.json` and `en.json` for every UI string.
+**Done when:** on the local MariaDB database, `pnpm -s hola:seed` then `pnpm -s hola:samples count` matches content rules §2; running `hola:seed` twice creates no duplicates; `hola:samples delete --dry-run` changes nothing; `grep -rnE "from ['\"](payload|@payloadcms/)|getPayload|payload\.config|payload-types|withPayload" src scripts package.json next.config.*` finds nothing; `.env.local` has no obsolete keys.
 
-**Done when:** `/` and `/en/` render with the right `<html lang>`, a stub page for each route type answers 200 in both languages, unknown paths answer 404, and a no-slash URL answers 308.
+## M5 · Site on MySQL
 
-## S5 · CLI scripts
+Run the production build and walk every row of `pnpm -s hola:urls` with the preview cookie: every URL answers its expected status; compare the 6 baseline pages with `kit/logs/v2-pages/` (same headings, sections, links, metadata; allowed differences: image URLs, ids). Fix regressions.
 
-Write every `pnpm hola:*` script of contracts §9 in `scripts/hola/`, with the exact output formats, wired in `package.json` as `payload run scripts/hola/<name>.ts --` (trailing ` --` required) or `tsx` with `.env.local` loaded. Never print secrets; `hola:test-session create` prints the JWT only to stdout for the acceptance script.
+**Done when:** every `hola:urls` row answers as expected, and the comparison is logged.
 
-Also build `POST /api/hola/revalidate` (contracts §16) now, so the scripts can call it.
+## M6 · Inquiries, mail, WhatsApp
 
-**Done when:** `pnpm -s hola:health` prints `{"db":true,…}`, each script runs on an empty database without crashing or prompting, and (after S6) `pnpm -s hola:samples delete --dry-run` prints `would_delete` while `pnpm -s hola:samples count` stays unchanged.
+`/api/hola/token`, `/api/hola/inquiry`, thank-you tracking, rate limit, `sendMail()` with nodemailer and the mail log, webhook, WhatsApp links — all per contracts §7–§8, now on MySQL.
 
-## S6 · Launch data and sample content
+**Done when:** a JSON submission with `X-Hola-Test: 1` returns 201 and is stored with `holaSample` true; the mail log gets a line with `to=(not-sent)` or `ADMIN_EMAIL`; the thank-you page fires `generate_lead` once.
 
-1. `pnpm hola:seed`: launch terms (contracts §4) with term-landing fields filled for every term that has items (draft copy), the fixed pages (contracts §5) with their templates and copy (content rules §5–§6), `site-settings` defaults (booking band on, stats strip, true trust items only, archive intros for all 5 collections in both languages, 2 sample cancellation policies, default WhatsApp messages, `reply_hours` `[pendiente]` / `[pending]`), the `navigation` global (spec §4), and the placeholder images.
-2. `pnpm hola:samples create`: the sample set of content rules §2, both languages in each document.
+## M7 · Auth and admin shell
 
-**Done when:** `pnpm -s hola:samples count` matches content rules §2 and running `hola:seed` twice creates no duplicates.
+`src/lib/auth.ts`, `/admin/login`, logout, `/admin/setup?key=`, session checks, roles, login rate limit, the admin layout (nav, language toggle, brand tokens), dashboard; interceptor update (`hola_session`, contracts §3, §11). `hola:test-session` on the new users table.
 
-## S7 · Design system, layout and components
+**Done when:** a visitor gets 307 from `/admin` to `/admin/login`; a `hola:test-session` token opens the dashboard; `/admin/setup` without the key answers 404; `/api/users` answers 404.
 
-**Design direction**
+## M8 · Admin screens
 
-- The owner's mockup (`kit/reference/homepage-mockup.jpeg`, if present) is the target look: `papyrus` page ground, Fraunces SemiBold headings, Plus Jakarta Sans text, `deep-oasis` bands, terracotta primary button, generous whitespace.
-- Use the real logo SVGs from `kit/brand/` in place of the mockup's text logo.
-- Apply `kit/brand/BRAND-GUIDE.md` strictly: token-only colours, the contrast rules, sparing pattern use.
-- Do not copy the mockup's rating, "free cancellation" or "pay online" claims, or its emoji icons. Use `lucide-react` icons (no icon CDN).
+Every screen in contracts §18 with full create/edit/delete, ES/EN tabs, list-field editors, relationship pickers, Markdown preview, validation, and revalidation on save. Test each screen by hand with a test session in a browser (Playwright if available): create an item in both languages, see it on the site, edit it, delete it. Remove test data afterwards.
 
-**Order of work**
+**Done when:** every entity can be created, edited and deleted from the admin in both languages and the change shows on the site; inquiries can change status and export CSV; users can be added and removed.
 
-1. **Brand files:** copy the brand assets per `kit/brand/README.md` ("In the app"). Import `kit/brand/05-tokens/brand-tokens.css` (copied to `src/styles/tokens.css`) once in the root layout. Fonts per contracts §17.
-2. **Styles:** plain CSS + CSS Modules only; every colour, size, space, radius, shadow and duration from the tokens. No Tailwind, Sass, CSS-in-JS or UI kit.
-3. **Root layout:** `<html lang>`, dataLayer + consent default first in `<head>` as raw inline `<script>` tags (not `next/script`; contracts §15), the two font preloads, skip link, `<main id="main">`, consent banner after `<main>`.
-4. **Header** per spec §4: mega panels from `navigation` (click/Enter/Esc/arrow keys, not hover-only), ES|EN switcher, WhatsApp (only when the number is set), terracotta CTA; breakpoints ≥1280 / 1024–1279 / <1024 drawer; sticky, shrinking 88 → 64 px after 120 px of scroll; mobile sticky bottom bar (price-from on trip pages).
-5. **Footer** per spec §4 on `deep-oasis` with the deep pattern, reverse stacked logo, 4 columns, bottom bar with legal links, `legal_name` + `licence_number` (or `[pendiente]` for admins only), © 2026, switcher.
-6. **Components:** trip card, destination tile, guide card, stats strip, booking band, trust bar, CTA band, filter bar, breadcrumbs (with BreadcrumbList), price box, itinerary accordion, includes/excludes, gallery (CSS scroll-snap + `<dialog>` lightbox), chips, badge, WhatsApp button, language switcher, FAQ accordion, `[pendiente]` marker.
-7. Client components only where interaction needs them (menu, drawer, gallery, filters, form steps, consent, sticky bar). Everything else is a server component.
+## M9 · Hostinger readiness
 
-**Done when:** the layout renders on `/` and `/en/` with no hydration warning and no console error.
+1. `next.config.ts` is a plain object (contracts §19); `outputFileTracingIncludes` for `drizzle/`; `images.localPatterns` for `/images/**` and `/brand/**`.
+2. Prove: `DATABASE_URL=mysql://x:x@127.0.0.1:1/x pnpm build` succeeds; then a normal build, and `pnpm start` with `HOLA_AUTO_MIGRATE=1` applies nothing new and logs the migrator result.
+3. Prove the standalone output contains the migrations: `ls .next/standalone/drizzle .next/standalone/drizzle/meta` lists the SQL files and `_journal.json`.
+4. `pnpm -s hola:deploy-check` passes locally.
+5. Check `kit/docs/07-DEPLOY-HOSTINGER.md` against the code (env names, scripts, build settings). Fix the code, not the guide, unless the guide is wrong; log any guide fix.
 
-## S8 · Templates
+**Done when:** all four proofs are logged.
 
-Build every template of spec "Templates and page sections" on the sample data, in both languages: Home (sections 1–10, from `pages` `home` blocks), tour, cruise, excursion, the three trip archives and their term landings (filters per contracts §5, 12 per page, sort, result count, SEO text, FAQ, CTA band), destination, destinations archive + region (with an inline SVG map of Egypt with region links), guide, guides archive + topic, Plan my trip (form placeholder until S9), thank-you, contact, FAQ, about, legal, search (grouped results), 404.
+## M10 · Acceptance and report
 
-After each template: request one ES and one EN URL of that type with the preview cookie, fix every server error, hydration warning and console error before moving on.
-
-**Done when:** every row of `pnpm -s hola:urls` answers its expected status with the preview cookie.
-
-## S9 · Forms, inquiry API, WhatsApp
-
-1. `GET /api/hola/token` and `POST /api/hola/inquiry` exactly per contracts §7 (JSON and form-encoded paths, honeypot, token, Turnstile when keys are set, rate limit, `X-Hola-Test`, storage, ref, mail through `sendMail()`, mail log, webhook after the response).
-2. Plan my trip: 4 steps, one page; without JavaScript it is one long form that posts form-encoded and gets a 303. With JavaScript: step navigation, `aria-live` step changes, an error summary, the token fetched on first focus, `plan_trip_start` / `plan_trip_step` events. Pre-fills the trip from `?trip=<type>-<id>`.
-3. Contact page form with `form=contact` on the same endpoint.
-4. Thank-you page: confirmation, WhatsApp button, 3 guides, `generate_lead` once per ref (contracts §7).
-5. UTM capture: `utm_*`, `gclid`, `fbclid` and the first landing page are kept in `sessionStorage` from the first page and sent only with the form.
-6. `whatsappUrl()` and every WhatsApp placement per contracts §8 and spec "WhatsApp".
-
-**Done when:** a JSON submission with `X-Hola-Test: 1` returns 201, the inquiry is stored with `holaSample: true`, the mail log has a new line whose `to=` is `ADMIN_EMAIL` or `(not-sent)`, and the thank-you page fires `generate_lead` once.
-
-## S10 · SEO
-
-Everything in contracts §10: metadata and title templates, canonical, hreflang, robots meta, `robots.ts`, `sitemap.ts`, OG images, JSON-LD per page type. `noindex, follow` and no canonical on filtered states.
-
-**Done when:** A7's SEO checks pass on every URL from `hola:urls`.
-
-## S11 · Tracking and consent
-
-dataLayer bootstrap, Consent Mode v2 defaults, the consent banner (translated, "Reject all" as prominent as "Accept all"), GTM only when `gtm_id` is set, and every event of contracts §15 wired (`data-he-*` attributes, server-rendered `view_item`). The cookie policy page lists the site's cookies.
-
-**Done when:** `view_item` is in the HTML of every trip page and no GTM script is present while `gtm_id` is empty.
-
-## S12 · Security, performance and accessibility pass
-
-1. **Security:** contracts §11; confirm logged-out `GET /api/users` and `GET /api/inquiries` are refused; no kit file is served; `git ls-files` has no `.env*` except `.env.example`.
-2. **Performance:** budgets of spec "Performance" adapted in `05-ACCEPTANCE.md` A13. Hero image `fetchpriority="high"`, everything below the fold lazy, no carousel library, static map images (no Maps JavaScript API), tree-shaken `lucide-react` imports.
-3. **Accessibility:** WCAG 2.2 AA per spec: visible focus rings, keyboard-operable menus and accordions, labelled form fields, tap targets ≥ 44 px, `prefers-reduced-motion`. If `npx @axe-core/cli` (or Playwright + axe) can run here, run it on Home, a tour, an archive and a guide in both languages, fix serious issues and log the results; if it cannot run, log that as a manual check.
-
-**Done when:** A12 and A13 pass and findings are logged.
-
-## S13 · Acceptance and report
-
-1. Commit.
-2. Check port 3000 is free, `pnpm build`, then `pnpm start` in the background (output to `kit/logs/server.log`), wait for it.
-3. `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt`.
-4. Fix every `FAIL` in the app (never by weakening a check; START-HERE "Acceptance checks"), commit, rebuild, restart, and re-run until the last line reads `fail=0`.
-5. Write `kit/BUILD-REPORT.md` from `kit/docs/06-REPORT-TEMPLATE.md` and commit it with the log.
-6. In your last message print: the final `ACCEPTANCE SUMMARY` line, `git log --oneline | head -20`, and the report's "Summary" and "Needs you" sections.
+1. Commit; stop the server; check port 3000; `pnpm build`; `pnpm start` in the background (output to `kit/logs/server.log`).
+2. `bash kit/bin/acceptance.sh 2>&1 | tee kit/reports/last-run.txt`.
+3. Fix every `FAIL` in the app, commit, rebuild, restart, re-run until the last line reads `fail=0`.
+4. Rewrite `kit/BUILD-REPORT.md` for v3 from `kit/docs/06-REPORT-TEMPLATE.md` (what changed from v2, the admin, the no-DB build proof, what the owner does next with `07-DEPLOY-HOSTINGER.md`), append the final log entry, and commit both. This report/log commit is the only commit allowed after the acceptance run and does not require re-running it.
+5. In your last message print: the final `ACCEPTANCE SUMMARY` line, the no-DB build proof line, `git log --oneline | head -15`, and the report's "Summary" and "Needs you" sections.
