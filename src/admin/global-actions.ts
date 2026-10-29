@@ -4,11 +4,12 @@ import { redirect } from 'next/navigation'
 
 import { requireAdmin, requireUser } from '@/lib/auth'
 import { saveNavigation, saveSettingsLocale, saveSettingsShared, type NavTree, type SettingsLocal, type SettingsShared } from '@/lib/content/globals'
-import { deleteImage, updateImageAlt, upsertImage, listImages } from '@/lib/content/images'
+import { deleteImage, getImage, updateImageAlt, upsertImage, listImages } from '@/lib/content/images'
 import { revalidateSite } from '@/lib/revalidate'
+import { removeUpload, storeUpload } from '@/lib/uploads'
 
 import { validateDoc } from './doc'
-import type { FormState } from './form/types'
+import type { FormState, ImageOpt } from './form/types'
 import { DICTS } from './i18n'
 import { scanPublicImages } from './scan'
 import { adminLang } from './server'
@@ -87,7 +88,29 @@ export async function scanImagesAction(): Promise<void> {
 
 export async function deleteImageAction(id: number): Promise<void> {
   await requireUser('/admin/images')
+  const row = await getImage(id)
   await deleteImage(id)
+  if (row) await removeUpload(row.path)
   revalidateSite()
   redirect('/admin/images?deleted=1')
+}
+
+export type UploadResult = { ok: true; image: ImageOpt } | { ok: false; message: string }
+
+/**
+ * One image from the admin (Images page or the picker in any edit form): stored outside the app
+ * (src/lib/uploads.ts) and registered in the library. Alt texts default to the file name, marked [pendiente].
+ */
+export async function uploadImageAction(data: FormData): Promise<UploadResult> {
+  await requireUser('/admin/images')
+  const t = DICTS[await adminLang()]
+  const file = data.get('file')
+  if (!(file instanceof File)) return { ok: false, message: t.upload_empty }
+  const stored = await storeUpload(file.name, Buffer.from(await file.arrayBuffer()))
+  if ('error' in stored) return { ok: false, message: `${file.name}: ${t[`upload_${stored.error}`]}` }
+  const name = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim().slice(0, 200) || 'image'
+  const altEs = String(data.get('alt_es') || '').trim().slice(0, 500) || `[pendiente] ${name}`
+  const altEn = String(data.get('alt_en') || '').trim().slice(0, 500) || `[pending] ${name}`
+  const id = await upsertImage({ path: stored.path, width: stored.width, height: stored.height, alt_es: altEs, alt_en: altEn, hola_sample: false })
+  return { ok: true, image: { id, path: stored.path, alt: altEs, width: stored.width, height: stored.height } }
 }

@@ -564,3 +564,27 @@ body.adm {
   outline: 1px dashed var(--he-terracotta-ink);
   padding: 0 0.2em;
 }
+
+/* Image upload (Images page and the picker dialog) */
+.adm-upload {
+  display: grid;
+  gap: var(--he-space-2);
+  justify-items: start;
+  margin-bottom: var(--he-space-4);
+  padding: var(--he-space-4);
+  border: 1px dashed var(--he-line);
+  border-radius: var(--he-radius-md);
+}
+.adm-upload ul {
+  margin: var(--he-space-1) 0 0;
+  padding-left: var(--he-space-4);
+}
+label.adm-btn:has(input:disabled),
+label.adm-btn[aria-disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+label.adm-btn:focus-within {
+  outline: 2px solid var(--he-deep-oasis);
+  outline-offset: 2px;
+}

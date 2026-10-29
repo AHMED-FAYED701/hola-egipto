@@ -86,6 +86,6 @@ Open the setup link, create your admin user, then log in at `https://hola-egipto
 ## Later
 
 - **Updates:** push to `main`; Hostinger rebuilds; new migrations apply on startup (`HOLA_AUTO_MIGRATE=1`).
-- **New photos:** add them under `public/images/`, push, then use **Admin → Images → Scan** to register them and set alt texts.
+- **New photos:** upload them in **Admin → Images → Subir imágenes**, or with **Subir imagen** inside any image picker. Files are stored outside the app in `HOLA_UPLOAD_DIR` (`/home/u889087686/domains/hola-egipto.com/hola-uploads`), so they survive redeploys; no redeploy is needed. Large photos are reduced to 2400 px in the browser. Photos committed under `public/images/` still work with **Scan**.
 - **Before launch:** Turnstile keys, `HOLA_DEV_MODE=0`, `HOLA_COMING_SOON=0`, real content, remove samples, legal texts, GTM ID. After changing variables, **redeploy** from hPanel (a restart may not pick up every change).
 - **Inquiry retention:** `pnpm -s hola:retention --env=hostinger` from time to time.

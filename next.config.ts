@@ -39,7 +39,8 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingIncludes: { '/**/*': ['./drizzle/**/*'] },
   experimental: {
-    serverActions: { allowedOrigins: ['hola-egipto.com', 'www.hola-egipto.com'] },
+    // bodySizeLimit: admin image uploads (src/lib/uploads.ts, max 10 MB per file).
+    serverActions: { allowedOrigins: ['hola-egipto.com', 'www.hola-egipto.com'], bodySizeLimit: '12mb' },
   },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
@@ -53,7 +54,7 @@ const nextConfig: NextConfig = {
   // Do not write AGENTS.md into the repository during `next dev`.
   agentRules: false,
   images: {
-    localPatterns: [{ pathname: '/images/**' }, { pathname: '/brand/**' }],
+    localPatterns: [{ pathname: '/images/**' }, { pathname: '/brand/**' }, { pathname: '/uploads/**' }],
     formats: ['image/webp'],
   },
   turbopack: {

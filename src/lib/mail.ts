@@ -68,7 +68,7 @@ export async function sendMail(input: MailInput): Promise<MailResult> {
   const finalTo = sent ? to.join(', ') : '(not-sent)'
   const line = `${new Date().toISOString()}\tto=${clean(finalTo)}\torig=${clean(original.join(', '))}\tsubject=${clean(subject)}\n`
   try {
-    const file = path.resolve(process.cwd(), process.env.HOLA_MAIL_LOG || 'kit/logs/mail.log')
+    const file = path.resolve(/*turbopackIgnore: true*/ process.cwd(), process.env.HOLA_MAIL_LOG || 'kit/logs/mail.log')
     await fs.mkdir(path.dirname(file), { recursive: true })
     await fs.appendFile(file, line, 'utf8')
   } catch (e) {

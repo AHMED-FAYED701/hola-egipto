@@ -1,5 +1,5 @@
-/** Image library (contracts §13): rows for files in public/images/, no uploads. */
-import { asc, count, eq, inArray, like, or } from 'drizzle-orm'
+/** Image library (contracts §13): rows for files in public/images/ and admin uploads (/uploads/…). */
+import { count, desc, eq, inArray, like, or } from 'drizzle-orm'
 
 import { getDb } from '@/db/client'
 import * as s from '@/db/schema'
@@ -9,7 +9,7 @@ export type ImageRow = typeof s.images.$inferSelect
 export async function listImages(q = ''): Promise<ImageRow[]> {
   const db = getDb()
   const where = q ? or(like(s.images.path, `%${q}%`), like(s.images.alt_es, `%${q}%`), like(s.images.alt_en, `%${q}%`)) : undefined
-  return db.select().from(s.images).where(where).orderBy(asc(s.images.path))
+  return db.select().from(s.images).where(where).orderBy(desc(s.images.created_at), desc(s.images.id))
 }
 
 export async function getImage(id: number): Promise<ImageRow | null> {

@@ -7,6 +7,7 @@ import { slugify } from '@/lib/slug'
 import type { Dict } from '../i18n'
 import type { Field, FormSpec, L } from '../spec'
 import type { FormDoc, FormOptions, FormState, ImageOpt, Rec, RefOpt, TripOpt } from './types'
+import { uploadOne } from './upload-client'
 
 type Lang = 'es' | 'en'
 interface Ctx {
@@ -15,6 +16,7 @@ interface Ctx {
   options: FormOptions
   errors: Record<string, string>
   preview: (md: string) => Promise<string>
+  addImage: (img: ImageOpt) => void
 }
 
 const lab = (l: L, ui: Lang) => l[ui]
@@ -49,11 +51,28 @@ function Thumb({ img }: { img: ImageOpt | undefined }) {
   return <img className="adm-thumb" src={img.path} alt={img.alt} width={96} height={Math.round((96 * img.height) / img.width)} loading="lazy" />
 }
 
-/** Image library picker in a <dialog> (no uploads, contracts §13). */
+/** Image library picker in a <dialog>: choose an existing image or upload a new one (picked at once). */
 function ImagePicker({ ctx, onPick, label }: { ctx: Ctx; onPick: (id: number) => void; label: string }) {
   const ref = useRef<HTMLDialogElement>(null)
   const [q, setQ] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
   const list = ctx.options.images.filter((i) => !q || (i.path + ' ' + i.alt).toLowerCase().includes(q.toLowerCase()))
+
+  async function onFile(input: HTMLInputElement) {
+    const file = input.files?.[0]
+    if (!file) return
+    setBusy(true)
+    setErr('')
+    const r = await uploadOne(file)
+    setBusy(false)
+    input.value = ''
+    if (!r.ok) return setErr(r.message)
+    ctx.addImage(r.image)
+    onPick(r.image.id)
+    ref.current?.close()
+  }
+
   return (
     <>
       <button type="button" className="adm-btn adm-btn--small" onClick={() => ref.current?.showModal()}>
@@ -62,10 +81,19 @@ function ImagePicker({ ctx, onPick, label }: { ctx: Ctx; onPick: (id: number) =>
       <dialog ref={ref} className="adm-dialog">
         <div className="adm-dialog__head">
           <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={ctx.t.searchPlaceholder} aria-label={ctx.t.search} />
+          <label className="adm-btn adm-btn--small adm-btn--primary" aria-disabled={busy || undefined}>
+            {busy ? ctx.t.uploading : ctx.t.uploadOne}
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={busy} onChange={(e) => onFile(e.currentTarget)} />
+          </label>
           <button type="button" className="adm-btn adm-btn--small" onClick={() => ref.current?.close()}>
             {ctx.t.cancel}
           </button>
         </div>
+        {err ? (
+          <p className="adm-error" role="alert">
+            {ctx.t.upload_failed} {err}
+          </p>
+        ) : null}
         <div className="adm-grid">
           {list.map((img) => (
             <button
@@ -501,7 +529,9 @@ export function DocForm({
   const [tab, setTab] = useState<Lang>('es')
   const [state, formAction, pending] = useActionState(action, {} as FormState)
   const errors = useMemo(() => state.errors || {}, [state.errors])
-  const ctx: Ctx = { ui, t, options, errors, preview }
+  const [uploaded, setUploaded] = useState<ImageOpt[]>([])
+  const allOptions = useMemo(() => (uploaded.length ? { ...options, images: [...uploaded, ...options.images] } : options), [options, uploaded])
+  const ctx: Ctx = { ui, t, options: allOptions, errors, preview, addImage: (img) => setUploaded((u) => [img, ...u]) }
   const errIn = (prefix: string) => Object.keys(errors).some((k) => k.startsWith(prefix + '.'))
 
   return (

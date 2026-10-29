@@ -105,6 +105,16 @@ const es = {
   total: 'Total',
   backToList: 'Volver a la lista',
   confirmDelete: 'Confirmar eliminación',
+  upload: 'Subir imágenes',
+  uploadOne: 'Subir imagen',
+  uploading: 'Subiendo…',
+  uploaded: 'Imágenes subidas:',
+  uploadHelp: 'JPG, PNG, WebP o GIF, hasta 10 MB. Las fotos grandes se reducen a 2400 px antes de subir.',
+  upload_empty: 'El archivo está vacío.',
+  upload_too_big: 'El archivo supera 10 MB.',
+  upload_type: 'Formato no admitido (usa JPG, PNG, WebP o GIF).',
+  upload_size: 'No se pudo leer el tamaño de la imagen.',
+  upload_failed: 'No se pudo subir:',
 } as const
 
 export type Dict = Record<keyof typeof es, string>
@@ -212,6 +222,16 @@ const en: Dict = {
   total: 'Total',
   backToList: 'Back to the list',
   confirmDelete: 'Confirm delete',
+  upload: 'Upload images',
+  uploadOne: 'Upload image',
+  uploading: 'Uploading…',
+  uploaded: 'Images uploaded:',
+  uploadHelp: 'JPG, PNG, WebP or GIF, up to 10 MB. Large photos are reduced to 2400 px before upload.',
+  upload_empty: 'The file is empty.',
+  upload_too_big: 'The file is larger than 10 MB.',
+  upload_type: 'Unsupported format (use JPG, PNG, WebP or GIF).',
+  upload_size: 'Could not read the image size.',
+  upload_failed: 'Could not upload:',
 }
 
 export const DICTS: Record<AdminLang, Dict> = { es, en }

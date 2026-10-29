@@ -1,4 +1,5 @@
 import { ImageAltForm } from '@/admin/form/ImageAltForm'
+import { ImageUpload } from '@/admin/form/ImageUpload'
 import { ConfirmButton } from '@/admin/form/ConfirmButton'
 import { deleteImageAction, saveImageAltAction, scanImagesAction } from '@/admin/global-actions'
 import { adminDict } from '@/admin/server'
@@ -9,7 +10,7 @@ export const metadata = { title: 'Images' }
 
 type Props = { searchParams: Promise<{ q?: string; scanned?: string; deleted?: string }> }
 
-/** Image library (contracts §13): grid, alt ES/EN, scan public/images/ for new files. No uploads. */
+/** Image library (contracts §13): upload (stored outside the app, src/lib/uploads.ts), grid, alt ES/EN, scan public/images/. */
 export default async function ImagesPage({ searchParams }: Props) {
   await requireUser('/admin/images')
   const { t } = await adminDict()
@@ -28,6 +29,7 @@ export default async function ImagesPage({ searchParams }: Props) {
           {t.deleted}
         </p>
       ) : null}
+      <ImageUpload t={t} />
       <div className="adm-toolbar">
         <form method="get" role="search">
           <input type="search" name="q" defaultValue={q} placeholder={t.searchPlaceholder} aria-label={t.search} />
